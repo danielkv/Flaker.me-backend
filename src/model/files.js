@@ -17,21 +17,18 @@ async function get(filter) {
 	});
 }
 
-function add(req, res) {
-	try {
-		let {uploaded:file, user} = req;
-		let sql = `INSERT INTO files (name, originalname, user_id, size, url, hash) VALUES ('${file.name}', '${file.originalname}', '${user.id}', '${file.size}', '${file.url}', '${file.hash}')`;
+function add(file) {
+	return new Promise((resolve, reject) => {
+		const sql = `INSERT INTO files (name, originalname, user_id, size, url, hash) VALUES ('${file.name}', '${file.originalname}', '${file.user_id}', '${file.size}', '${file.url}', '${file.hash}')`;
 		
 		conn.query(sql, async (err, results) => {
-			if (err) throw new Error(err);
+			if (err) return reject(err);
 
 			let inserted_row = await get({id:results.insertId});
 
-			return res.send(inserted_row[0]);
+			return resolve(inserted_row[0]);
 		})
-	} catch (e) {
-		return res.status(403).send(e);
-	}
+	});
 }
 
 module.exports = {

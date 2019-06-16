@@ -1,16 +1,11 @@
-const {Storage} = require('@google-cloud/storage');
 const {format} = require('util');
 const crypto = require('crypto');
-
-const storage = new Storage({
-	projectId: 'backupsystem',
-	keyFilename: './credentials.json',
-});
+const storage = require('../model/storage');
 
 function selectBucket(req, res, next) {
 	try {
 		let {user} = req;
-		const bucket = storage.bucket(user.bucket);
+		const bucket = storage.instance.bucket(user.bucket);
 		bucket.exists((err, exists)=>{
 			if (err) throw err;
 			if (!exists) throw {code:'bucket_not_found', message:'Pasta do usuário não encontrada'};
@@ -56,13 +51,7 @@ function upload (req, res, next) {
 	}
 }
 
-function _delete () {
-
-}
-
 module.exports = {
-	upload,
-	delete:_delete,
-
+	upload, 
 	selectBucket,
 }

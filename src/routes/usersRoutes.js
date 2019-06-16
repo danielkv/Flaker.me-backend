@@ -1,5 +1,5 @@
 const routes = require('express').Router();
-const Users = require('../controllers/users');
+const Users = require('../model/users');
 
 routes.post('/users', Users.add);
 routes.put('/users', async (req, res)=>{

@@ -13,28 +13,27 @@ function salt(password, salt) {
 	}
 }
 
-async function add (req, res, next) {
-	try {
-		let {query:user} = req;
+async function exists (user) {
+	const user_exists = await get({email : user.email});
+	if (user_exists.length) throw {code: 'user_exists', message:`Esse email (${user.email}) já foi cadastrado no banco de dados`};
+	return user;
+}
 
-		let user_exists = await get({email : user.email});
-		if (user_exists.length) throw {code: 'email_exists', message:`Esse email (${user.email}) já foi cadastrado no banco de dados`};
-
-		let salted = salt(user.password);
+async function add (user) {
+	return new Promise((resolve, reject) => {
+		const salted = salt(user.password);
 	
-		let inserts = [user.name, user.limit, user.email, salted.password, salted.salt];
+		const inserts = [user.name, user.limit, user.email, salted.password, salted.salt];
 		let sql = 'INSERT INTO users (`name`, `limit`, `email`, `password`, `salt`) VALUES (?, ?, ?, ?, ?)';
 		sql = mysql.format(sql, inserts);
 
 		conn.query(sql, async (error, results) => {
-			if (error) throw error;
+			if (error) return reject(error);
 			let inserted = await get({id : results.insertId});
-			return res.send(inserted[0]);
+			return resolve(inserted[0]);
 		});
 
-	} catch (e) {
-		return res.status(403).send(e);
-	}
+	});
 }
 
 async function get (filter, fields) {
@@ -80,62 +79,9 @@ async function update(user) {
 	});
 }
 
-
-async function authorize(email, password) {
-	return new Promise(async (resolve, reject) => {
-		try {
-			if (!email || !password) throw {code:'no_data', message:'Não foi enviado nenhuma informação para autenticação'};
-
-			let user_exists = await get({email : email}, ['salt']);
-			if (user_exists.length != 1) throw {code: 'user_not_found', message:`Usuário não encontrado`};
-			user_exists = user_exists[0];
-
-			let salted = salt(password, user_exists.salt);
-
-			let user = await get({email : email, password:salted.password});
-			if (user.length != 1) throw {code: 'password_incorrect', message:`Senha incorreta`};
-			user = user[0];
-			
-			let token = await jwt.sign({
-				id:user.id,
-				email:user.email,
-			});
-
-			return resolve({
-				token,
-				id : user.id,
-				email : user.email,
-			});
-
-		} catch (e) {
-			return reject(e);
-		}
-	});
-}
-async function authenticate(req, res, next) {
-	try {
-		let token = req.headers['authorization'];
-		if (!token) throw {code:'no_token', message:'Não foi enviado nenhuma token'};
-
-		let user = await jwt.verify(token);
-		if (!user.id || !user.email) throw {code:'incorrect_token', message:'Não possível autenticar o token'};
-
-		let user_exists = await get({id: user.id, email : user.email});
-		if (user_exists.length != 1) throw {code: 'user_not_found', message:`Usuário não encontrado`};
-
-		req.user = user_exists[0];
-
-		next();
-
-	} catch (e) {
-		return res.status(403).send(e);
-	}
-}
-
 module.exports = {
 	add,
 	get,
 	update,
-	authorize,
-	authenticate,
+	exists,
 }

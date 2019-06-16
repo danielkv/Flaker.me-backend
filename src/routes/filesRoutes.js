@@ -1,8 +1,8 @@
 const routes = require('express').Router();
-const Files = require('../controllers/files');
 const multer = require('multer');
 const multerConfig = require('../config/multer');
-const gcloud = require('../controllers/gcloud');
+const Files = require('../model/files');
+const Storage = require('../controller/storageController');
 
 routes.get('/files', async function (req, res, next) {
 	try {
@@ -13,6 +13,6 @@ routes.get('/files', async function (req, res, next) {
 	}
 });
 
-routes.post('/files', multer(multerConfig).single('file'), gcloud.upload, Files.add);
+routes.post('/files', multer(multerConfig).single('file'), Storage.upload, Files.add);
 
 module.exports = routes;
