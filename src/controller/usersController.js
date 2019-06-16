@@ -1,5 +1,6 @@
 const Users = require('../model/users');
 const Storage = require('../model/storage');
+const jwt = require('../model/jwt');
 
 async function create(req, res, next) {
 	const user = req.query;

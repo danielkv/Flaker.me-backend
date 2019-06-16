@@ -6,7 +6,7 @@ function slugify(text) {
     text = text.replace(new RegExp('[ÓÒÔÕ][óòôõ]','gi'), 'o');
     text = text.replace(new RegExp('[ÚÙÛ][úùû]','gi'), 'u');
     text = text.replace(new RegExp('[Ç][ç]','gi'), 'c');
-    return text;                 
+    return text.toLowerCase();                 
 }
 
 module.exports = {

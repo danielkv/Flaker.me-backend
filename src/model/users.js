@@ -1,9 +1,8 @@
 const crypto = require('crypto');
 const {conn, mysql, formatFilter} = require('./connection');
-const jwt = require('./jwt');
 
-function salt(password, salt) {
-	let _salt = salt || crypto.randomBytes(16).toString('hex');
+function salt(password, salt=null) {
+	const _salt = salt || crypto.randomBytes(16).toString('hex');
 	var hash = crypto.createHmac('sha512', _salt);
 	hash.update(password);
 	let _password = hash.digest('hex');
@@ -23,8 +22,8 @@ async function add (user) {
 	return new Promise((resolve, reject) => {
 		const salted = salt(user.password);
 	
-		const inserts = [user.name, user.limit, user.email, salted.password, salted.salt];
-		let sql = 'INSERT INTO users (`name`, `limit`, `email`, `password`, `salt`) VALUES (?, ?, ?, ?, ?)';
+		const inserts = [user.name, user.limit, user.email, user.bucket, salted.password, salted.salt];
+		let sql = 'INSERT INTO users (`name`, `limit`, `email`, `bucket`, `password`, `salt`) VALUES (?, ?, ?, ?, ?, ?)';
 		sql = mysql.format(sql, inserts);
 
 		conn.query(sql, async (error, results) => {
