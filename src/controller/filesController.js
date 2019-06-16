@@ -6,7 +6,7 @@ async function create(req, res) {
 		user_id : user.id,
 	}
 	
-	const inserted = fileFiles.add(file).catch((e)=>{
+	const inserted = Files.add(file).catch((e)=>{
 		return res.status(403).send(e);
 	});
 

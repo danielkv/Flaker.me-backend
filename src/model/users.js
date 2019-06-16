@@ -8,7 +8,7 @@ function salt(password, salt=null) {
 	let _password = hash.digest('hex');
 	return {
 		password:_password,
-		salt,
+		salt:_salt,
 	}
 }
 
@@ -31,7 +31,6 @@ async function add (user) {
 			let inserted = await get({id : results.insertId});
 			return resolve(inserted[0]);
 		});
-
 	});
 }
 
