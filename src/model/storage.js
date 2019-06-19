@@ -1,6 +1,7 @@
 const {Storage} = require('@google-cloud/storage');
 
 const myUtils = require('../utils');
+const UserSettings = require('./userSettings');
 
 const storage = new Storage({
 	projectId: 'backupsystem',
@@ -8,26 +9,30 @@ const storage = new Storage({
 });
 
 async function createBucket(user) {
-	return new Promise((resolve, reject)=>{
+	//return new Promise((resolve, reject)=>{
 		const slug_name = myUtils.slugify(user.bucket_name || user.name);
 		const bucket = storage.bucket(slug_name);
-		bucket.create((err, bucket) => {
-			if (err) return reject(err);
-			user.bucket = slug_name;
-			return resolve(user);
-		});
-	})
+
+		await bucket.create({nearline:true});
+		user.bucket = bucket;
+		return user;
+	//})
 }
 
+async function addLifecycleRule(user, _rule={}) {
+	const bucket = user.bucket || user;
+	const rule = {
+		...UserSettings.getDefaults().lifecycle,
+		..._rule,
+	}
+	await bucket.addLifecycleRule(rule, {append:false});
 
-
-function _delete () {
-
+	return user;
 }
+
 
 module.exports = {
-	delete:_delete,
-
 	instance:storage,
 	createBucket,
+	addLifecycleRule,
 }

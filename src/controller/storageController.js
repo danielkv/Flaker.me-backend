@@ -1,22 +1,32 @@
 const {format} = require('util');
 const crypto = require('crypto');
-const storage = require('../model/storage');
+const Storage = require('../model/storage');
 
 function selectBucket(req, res, next) {
-	try {
-		let {user} = req;
-		const bucket = storage.instance.bucket(user.bucket);
-		bucket.exists((err, exists)=>{
-			if (err) throw err;
-			if (!exists) throw {code:'bucket_not_found', message:'Pasta do usuário não encontrada'};
+	
+	let {user} = req;
+	const bucket = Storage.instance.bucket(user.bucket);
+	
+	bucket.exists((err, exists)=>{
+		if (err) return res.status(403).send(err);
+		if (!exists) return res.status(403).send({code:'bucket_not_found', message:'Pasta do usuário não encontrada'});
 
-			req.bucket = bucket;
-			console.log(exists);
-			next();
-		});
-	} catch (e) {
+		req.bucket = bucket;
+		next();
+	});
+}
+
+async function verifyLimit (req, res, next) {
+	const {bucket, user} = req;
+
+	const size = await Files.getSize(bucket).catch((e)=>{
 		return res.status(403).send(e);
-	}
+	});
+
+	if ((user.limit !== 0) && ((size / 1024 / 1024 / 1024) >= user.limit))
+		return res.status(403).send({code:'limit exceeded', message:'O limite de armazenamento foi atingido.'});
+		
+	next();
 }
 
 function upload (req, res, next) {
@@ -39,7 +49,7 @@ function upload (req, res, next) {
 				originalname : file.originalname,
 				size : file.size,
 				url : format(`https://storage.googleapis.com/${bucket.name}/${_file.name}`),
-				hash : 'null',
+				metadata : _file.metadata,
 			};
 			
 			next();
@@ -54,4 +64,5 @@ function upload (req, res, next) {
 module.exports = {
 	upload, 
 	selectBucket,
+	verifyLimit,
 }

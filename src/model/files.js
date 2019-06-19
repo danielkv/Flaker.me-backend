@@ -17,9 +17,9 @@ async function get(filter) {
 	});
 }
 
-function add(file) {
+async function add(file) {
 	return new Promise((resolve, reject) => {
-		const sql = `INSERT INTO files (name, originalname, user_id, size, url, hash) VALUES ('${file.name}', '${file.originalname}', '${file.user_id}', '${file.size}', '${file.url}', '${file.hash}')`;
+		const sql = `INSERT INTO files (name, originalname, user_id, size, url, hash) VALUES ('${file.name}', '${file.originalname}', '${file.user_id}', '${file.size}', '${file.url}', '${file.metadata.md5Hash}')`;
 		
 		conn.query(sql, async (err, results) => {
 			if (err) return reject(err);
@@ -31,7 +31,19 @@ function add(file) {
 	});
 }
 
+async function getSize(bucket) {
+	const [files] = await bucket.getFiles();
+	let total = 0;
+
+	files.forEach((file) => {
+		total += file.metadata.size;
+	});
+
+	return total;
+}
+
 module.exports = {
 	get,
 	add,
+	getSize,
 }

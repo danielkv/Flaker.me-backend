@@ -1,7 +1,7 @@
 const routes = require('express').Router();
 const multer = require('multer');
 const multerConfig = require('../config/multer');
-const Files = require('../model/files');
+const Files = require('../controller/filesController');
 const Storage = require('../controller/storageController');
 
 routes.get('/files', async function (req, res, next) {
@@ -13,6 +13,8 @@ routes.get('/files', async function (req, res, next) {
 	}
 });
 
-routes.post('/files', multer(multerConfig).single('file'), Storage.upload, Files.add);
+routes.post('/files', Storage.verifyLimit, multer(multerConfig).single('file'), Storage.upload, Files.create);
+
+//routes.get('/files/list', Storage.verifyLimit);
 
 module.exports = routes;

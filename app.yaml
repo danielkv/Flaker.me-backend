@@ -1,2 +1,4 @@
 runtime: nodejs
 env: flex
+env_variables:
+  PRIVATE_KEY: Q9gHUi2SvWwd5xKUn6Ikh4FqMfxnx0md

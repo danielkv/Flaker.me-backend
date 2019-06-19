@@ -22,8 +22,8 @@ async function add (user) {
 	return new Promise((resolve, reject) => {
 		const salted = salt(user.password);
 	
-		const inserts = [user.name, user.limit, user.email, user.bucket, salted.password, salted.salt];
-		let sql = 'INSERT INTO users (`name`, `limit`, `email`, `bucket`, `password`, `salt`) VALUES (?, ?, ?, ?, ?, ?)';
+		const inserts = [user.name, user.limit, user.email, user.bucket.name, salted.password, salted.salt];
+		let sql = 'INSERT INTO users (`name`, `limit`, `email`, `bucket`, `password`, `salt`, `private`) VALUES (?, ?, ?, ?, ?, ?)';
 		sql = mysql.format(sql, inserts);
 
 		conn.query(sql, async (error, results) => {

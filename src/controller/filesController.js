@@ -13,6 +13,17 @@ async function create(req, res) {
 	return res.send(inserted);
 }
 
+function read (req, res, next) {
+	Files.get()
+	.then((files) => {
+		return res.send(files);
+	})
+	.catch((e) => {
+		return res.status(403).send(e);
+	});
+}
+
 module.exports = {
 	create,
+	read,
 }
