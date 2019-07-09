@@ -1,5 +1,4 @@
 const jwt = require('jsonwebtoken');
-require('dotenv').config();
 
 async function sign (data) {
 	return new Promise( (resolve, reject) => {

@@ -1,12 +1,15 @@
 const mysql = require('mysql');
 
-const connection = mysql.createPool({
+const connection_settings = {
 	connectionLimit 	: 10,
-	host		    	: '35.199.99.140',
-	user     			: 'user_system',
-	password 			: 'p42e7WNVdnfVcS5',
-	database 			: 'BackupSystem',
-});
+	user     			: process.env.MYSQL_USER,
+	password 			: process.env.MYSQL_PASSWORD,
+	database 			: process.env.MYSQL_DB,
+}
+
+if (process.env.MYSQL_DSN) connection_settings.socketPath = `/cloudsql/${process.env.MYSQL_DSN}`;
+
+const connection = mysql.createPool(connection_settings);
 
 function formatFilter (filter) {
 	let formatted = '';
