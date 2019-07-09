@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const jwt = require('./jwt');
 const {conn, mysql, formatFilter} = require('./connection');
 
 function salt(password, salt=null) {
@@ -23,7 +24,7 @@ async function add (user) {
 		const salted = salt(user.password);
 	
 		const inserts = [user.name, user.limit, user.email, user.bucket.name, salted.password, salted.salt];
-		let sql = 'INSERT INTO users (`name`, `limit`, `email`, `bucket`, `password`, `salt`, `private`) VALUES (?, ?, ?, ?, ?, ?)';
+		let sql = 'INSERT INTO users (`name`, `limit`, `email`, `bucket`, `password`, `salt`) VALUES (?, ?, ?, ?, ?, ?)';
 		sql = mysql.format(sql, inserts);
 
 		conn.query(sql, async (error, results) => {
@@ -46,6 +47,7 @@ async function get (filter, fields) {
 
 			conn.query(sql, (error, results, fields) => {
 				if (error) throw new Error(error);
+
 				return resolve(results);
 			});
 		} catch (e) {
@@ -77,9 +79,50 @@ async function update(user) {
 	});
 }
 
+async function authorize (email, password) {
+	let user_exists = await get({email : email}, ['salt']);
+	if (user_exists.length != 1) throw {code: 'user_not_found', message:`Usuário não encontrado`};
+
+	user_exists = user_exists[0];
+	if (!user_exists.active) throw {code: 'inactive_user', message:'Usuário desativado'};
+
+	const salted = salt(password, user_exists.salt);
+
+	let user = await get({email : email, password:salted.password});
+	if (user.length != 1) throw {code: 'password_incorrect', message:`Senha incorreta`};
+	user = user[0];
+	
+	const token = await jwt.sign({
+		id:user.id,
+		email:user.email,
+	});
+
+	return {
+		token,
+		...user,
+	};
+}
+
+async function authenticate (token) {
+
+	let user = await jwt.verify(token);
+	if (!user.id || !user.email) throw {code:'incorrect_token', message:'Não foi possível autenticar o token'};
+
+	let user_exists = await get({id: user.id, email : user.email});
+	if (user_exists.length != 1) throw {code: 'user_not_found', message:`Usuário não encontrado`};
+
+	user_exists = user_exists[0];
+	if (!user_exists.active) throw {code: 'inactive_user', message:'Usuário desativado'};
+
+	return user_exists;
+}
+
 module.exports = {
 	add,
 	get,
 	update,
 	exists,
+
+	authenticate,
+	authorize
 }

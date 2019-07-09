@@ -9,14 +9,13 @@ const storage = new Storage({
 });
 
 async function createBucket(user) {
-	//return new Promise((resolve, reject)=>{
-		const slug_name = myUtils.slugify(user.bucket_name || user.name);
-		const bucket = storage.bucket(slug_name);
+	console.log(user);
+	const slug_name = myUtils.slugify(user.bucket_name || user.name);
+	const bucket = storage.bucket(slug_name);
 
-		await bucket.create({nearline:true});
-		user.bucket = bucket;
-		return user;
-	//})
+	await bucket.create({nearline:true});
+	user.bucket = bucket;
+	return user;
 }
 
 async function addLifecycleRule(user, _rule={}) {

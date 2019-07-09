@@ -1,20 +1,24 @@
 const Files = require('../model/files');
 
 async function create(req, res) {
+	const {user} = req;
 	const file = {
-		...req.file,
+		...req.uploaded,
 		user_id : user.id,
 	}
 	
-	const inserted = Files.add(file).catch((e)=>{
+	Files.add(file)
+	.then((inserted) =>{
+		return res.json(inserted);
+	})
+	.catch((e)=>{
 		return res.status(403).send(e);
 	});
-
-	return res.send(inserted);
 }
 
 function read (req, res, next) {
-	Files.get()
+	const {user} = req;
+	Files.get({user_id:user.id})
 	.then((files) => {
 		return res.send(files);
 	})

@@ -1,16 +1,15 @@
 const Users = require('../model/users');
 const Storage = require('../model/storage');
-const UserSettings = require('../model/userSettings');
-const jwt = require('../model/jwt');
+//const UserSettings = require('../model/userSettings');
 
 function create(req, res) {
-	const user = req.query;
+	const user = req.body.length ? req.body : req.query;
 
 	Users.exists(user)
 	.then(Storage.createBucket)
 	.then(Storage.addLifecycleRule)
 	.then(Users.add)
-	.then(UserSettings.add)
+	//.then(UserSettings.add)
 	
 	// return to front
 	.then((inserted)=>{
@@ -22,45 +21,26 @@ function create(req, res) {
 }
 
 async function authorize(req, res, next) {
-	const {email, password} = req.query;
-	
-	if (!email || !password) return res.status(403).send({code:'no_data', message:'Não foi enviado nenhuma informação para autenticação'});
+	try {
+		const {email, password} = req.body;
+		if (!email || !password) throw {code:'no_data', message:'Não foi enviado nenhuma informação para autenticação'};
 
-	let user_exists = await Users.get({email : email}, ['salt']);
-	if (user_exists.length != 1) return res.status(403).send({code: 'user_not_found', message:`Usuário não encontrado`});
-	user_exists = user_exists[0];
-	if (user_exists.active) return res.status(403).send({code: 'inactive_user', message:'Usuário desativado'});
+		const authorization = await Users.authorize(email, password);
 
-	const salted = salt(password, user_exists.salt);
+		return res.send(authorization);
 
-	const user = await Users.get({email : email, password:salted.password});
-	if (user.length != 1) return res.status(403).send({code: 'password_incorrect', message:`Senha incorreta`});
-	user = user[0];
-	
-	const token = await jwt.sign({
-		id:user.id,
-		email:user.email,
-	});
-
-	return res.send({
-		token,
-		...user,
-	});
+	} catch (e) {
+		return res.status(403).send(e);
+	}
 }
 
 async function authenticate(req, res, next) {
 	try {
-		
-		let token = req.headers['authorization'];
-		if (!token) throw {code:'no_token', message:'Não foi enviado nenhuma token'};
+		const token = req.headers['authorization'];
+		if (!token) throw {code:'no_token', message:'Não foi enviado nenhum token'};
 
-		let user = await jwt.verify(token);
-		if (!user.id || !user.email) throw {code:'incorrect_token', message:'Não foi possível autenticar o token'};
-
-		let user_exists = await Users.get({id: user.id, email : user.email});
-		if (user_exists.length != 1) throw {code: 'user_not_found', message:`Usuário não encontrado`};
-		user_exists = user_exists[0];
-		if (user_exists.active) throw {code: 'inactive_user', message:'Usuário desativado'};
+		const user = await Users.authenticate(token);
+		req.user = user;
 		
 		next();
 
@@ -69,7 +49,22 @@ async function authenticate(req, res, next) {
 	}
 }
 
+async function authenticate_endpoint (req, res, next) {
+	try {
+		const token = req.headers['authorization'];
+		if (!token) throw {code:'no_token', message:'Não foi enviado nenhuma token'};
+
+		const user = await Users.authenticate(token);
+		
+		res.send(user);
+
+	} catch (e) {
+		return res.status(403).send(e);
+	}
+}
+
 module.exports = {
+	authenticate_endpoint,
 	authenticate,
 	authorize,
 

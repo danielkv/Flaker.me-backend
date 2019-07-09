@@ -6,9 +6,12 @@ async function get(filter) {
 			let sql = 'SELECT * FROM files';
 
 			if (filter) sql += ` WHERE ${formatFilter(filter)}`;
+
+			//ORDER
+			sql += ' ORDER BY created DESC';
 			
 			conn.query(sql, (err, res) => {
-				if (err) throw new Error(err);
+				if (err) throw err;
 				return resolve(res);
 			})
 		} catch (e) {
@@ -17,9 +20,9 @@ async function get(filter) {
 	});
 }
 
-async function add(file) {
+function add(file) {
 	return new Promise((resolve, reject) => {
-		const sql = `INSERT INTO files (name, originalname, user_id, size, url, hash) VALUES ('${file.name}', '${file.originalname}', '${file.user_id}', '${file.size}', '${file.url}', '${file.metadata.md5Hash}')`;
+		const sql = `INSERT INTO files (name, originalname, user_id, size, url, hash) VALUES ('${file.name}', '${file.originalname}', '${file.user_id}', '${file.size}', '${file.url}', '${file.hash}')`;
 		
 		conn.query(sql, async (err, results) => {
 			if (err) return reject(err);
@@ -36,7 +39,7 @@ async function getSize(bucket) {
 	let total = 0;
 
 	files.forEach((file) => {
-		total += file.metadata.size;
+		total += parseInt(file.metadata.size);
 	});
 
 	return total;
