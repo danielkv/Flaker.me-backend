@@ -1,4 +1,3 @@
-const {format} = require('util');
 const crypto = require('crypto');
 const Storage = require('../model/storage');
 const Files = require('../model/files');
@@ -19,7 +18,7 @@ function selectBucket(req, res, next) {
 
 async function verifyLimit (req, res, next) {
 	const {bucket, user} = req;
-	const filesize = parseInt(req.headers['content-length']);
+	const filesize = parseInt(req.headers['filesize']);
 
 	const size = await Files.getSize(bucket).catch((e)=>{
 		return res.status(403).send(e);
@@ -57,51 +56,28 @@ function listFiles (req, res) {
 	});
 }
 
-function upload (req, res, next) {
-	try {
-		const {filename, filehash, filetype} = req.headers;
-		const filesize = req.headers['content-length'];
-		const {bucket} = req;
+function createResumableUpload(req, res) {
+	const {bucket} = req;
+	const {originalname} = req.body.length ? req.body : req.query;
 
-		const random = crypto.randomBytes(16).toString('hex');
-		
-		const _file = bucket.file(`${random}-${filename}`);
-		
-		const blobStream = _file.createWriteStream();
-		
-		blobStream.on('error', (err) => {
-			res.status(403).send(err);
-			blobStream.end();
+	const random = crypto.randomBytes(16).toString('hex');
+	
+	const _file = bucket.file(`${random}-${originalname}`);
+
+	_file.createResumableUpload((err, uri)=>{
+		if (err) res.status(403).send(err);
+
+		res.send({
+			uri,
+			file : _file
 		});
-
-		blobStream.on('finish', () => {
-			// The public URL can be used to directly access the file via HTTP.
-			//const publicUrl = format(`https://storage.googleapis.com/${bucket.name}/${blob.name}`);
-
-			_file.setMetadata({contentType:filetype});
-
-			req.uploaded = {
-				name : _file.name,
-				originalname : filename,
-				size : filesize,
-				url : format(`https://storage.googleapis.com/${bucket.name}/${_file.name}`),
-				hash : filehash,
-				metadata : _file.metadata,
-			};
-			
-			next();
-		});
-
-		req.pipe(blobStream);
-	} catch (e) {
-		return res.status(403).send(e);
-	}
+	});
 }
 
 module.exports = {
-	upload, 
 	selectBucket,
 	verifyLimit,
 	listFiles,
 	download,
+	createResumableUpload
 }

@@ -1,9 +1,17 @@
 const Files = require('../model/files');
+const {format} = require('util');
 
 async function create(req, res) {
-	const {user} = req;
+	const {user, bucket} = req;
+	const {name, originalname, timeCreated, size, hash} = Object.keys(req.body).length ? req.body : req.query;
+	
 	const file = {
-		...req.uploaded,
+		name,
+		originalname,
+		size,
+		url : format(`https://storage.googleapis.com/${bucket.name}/${name}`),
+		hash,
+		
 		user_id : user.id,
 	}
 	
