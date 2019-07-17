@@ -5,8 +5,12 @@ function slugify(text) {
     text = text.replace(new RegExp('[ÍÌÎ][íìî]','gi'), 'i');
     text = text.replace(new RegExp('[ÓÒÔÕ][óòôõ]','gi'), 'o');
     text = text.replace(new RegExp('[ÚÙÛ][úùû]','gi'), 'u');
-    text = text.replace(new RegExp('[Ç][ç]','gi'), 'c');
-    return text.toLowerCase();                 
+	text = text.replace(new RegExp('[Ç][ç]','gi'), 'c');
+	text = text.replace(new RegExp('[\(\)\[\]]','gi'), 'c');
+	text = text.trim().toLowerCase();
+	text = text.replace(' - ', '-');
+	text = text.replace(' ', '-');
+    return text;                 
 }
 
 module.exports = {

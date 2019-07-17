@@ -25,9 +25,18 @@ async function create(req, res) {
 }
 
 function read (req, res, next) {
-	const {user} = req;
-	Files.get({user_id:user.id})
-	.then((files) => {
+	const {user, bucket} = req;
+	Promise.all([Files.get({user_id:user.id}), bucket.getFiles()])
+	.then(([files, online_files]) => {
+		online_files = online_files[0];
+		files = files.map(file=> {
+			if (!online_files.find(on_file => {
+				console.log(on_file.id, file.name)
+				return on_file.id == file.name;
+			})) file.exists = false;
+			else file.exists = true;
+			return file;
+		});
 		return res.send(files);
 	})
 	.catch((e) => {
