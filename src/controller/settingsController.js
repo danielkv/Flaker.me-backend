@@ -1,4 +1,5 @@
 const Settings = require('../model/userSettings');
+const Storage = require('../model/storage');
 
 async function load (req, res) {
 	try {
@@ -14,23 +15,41 @@ async function load (req, res) {
 
 async function update (req, res) {
 	try {
-		const {user, body} = req;
-		const existing_settings = await Settings.get(user);
-		let settings;
 
-		if (Object.keys(existing_settings).length)
-			settings = await Settings.update(user, body);
+		if (Object.keys(req.old_settings).length)
+			await Settings.update(req.user, req.new_settings);
 		else
-			settings = await Settings.add(user, body);
+			await Settings.add(req.user, req.new_settings);
 		
-		res.send(settings);
+		res.send(req.new_settings);
 
 	} catch (e) {
+		console.log(e);
 		return res.status(403).send(e);
 	}
+}
+
+async function setupSettingsVars(req, res, next) {
+	const {user, body} = req;
+	req.old_settings = await Settings.get(user);
+	req.new_settings = Settings.sanitize(body);
+	next();
+}
+
+function setNewSettings(req, res, next) {
+	//lifecycle
+	Storage.addLifecycleRule(req.bucket, req.new_settings.lifecycle)
+	.then(()=>{
+		next();
+	})
+	.catch((e) => {
+		return res.status(403).send(e);
+	});
 }
 
 module.exports = {
 	load,
 	update,
+	setNewSettings, 
+	setupSettingsVars,
 }

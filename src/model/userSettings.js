@@ -18,7 +18,7 @@ function getDefaults() {
 async function add(user, settings) {
 	return new Promise((resolve, reject) => {
 		const user_id = user.id || user;
-		const _settings = sanitize(settings);
+		const _settings = settings;
 		const settings_save = JSON.stringify(_settings);
 		
 		let sql = 'INSERT INTO users_settings (`user_id`, `settings`) VALUES (?, ?)';
@@ -53,7 +53,7 @@ async function update(user, _settings) {
 	return new Promise((resolve, reject) => {
 		if (!_settings) return reject({code:'no_settigs', message:'Nenhuma configuração para salvar'});
 		const user_id = user.id || user;
-		const new_settings = sanitize({...getDefaults(), ..._settings});
+		const new_settings = _settings;
 
 		let sql = 'UPDATE users_settings SET `settings` = ?';
 		sql = mysql.format(sql, [JSON.stringify(new_settings)]);
@@ -104,4 +104,5 @@ module.exports = {
 	get,
 	update,
 	getDefaults,
+	sanitize
 }

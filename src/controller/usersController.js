@@ -7,9 +7,7 @@ function create(req, res) {
 
 	Users.exists(user)
 	.then(Storage.createBucket)
-	.then(Storage.addLifecycleRule)
 	.then(Users.add)
-	//.then(UserSettings.add)
 	
 	// return to front
 	.then((inserted)=>{
