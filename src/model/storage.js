@@ -9,7 +9,6 @@ const storage = new Storage({
 });
 
 async function createBucket(user) {
-	console.log(user);
 	const slug_name = myUtils.slugify(user.bucket_name || user.name);
 	const bucket = storage.bucket(slug_name);
 

@@ -31,7 +31,6 @@ function read (req, res, next) {
 		online_files = online_files[0];
 		files = files.map(file=> {
 			if (!online_files.find(on_file => {
-				console.log(on_file.id, file.name)
 				return on_file.id == file.name;
 			})) file.exists = false;
 			else file.exists = true;

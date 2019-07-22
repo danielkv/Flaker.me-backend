@@ -1,5 +1,5 @@
-runtime: nodejs
-env: flex
+runtime: nodejs10
+#env: flex
 env_variables:
   PRIVATE_KEY: Q9gHUi2SvWwd5xKUn6Ikh4FqMfxnx0md
   MYSQL_DSN: backupsystem:southamerica-east1:backup-system

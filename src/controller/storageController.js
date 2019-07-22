@@ -42,6 +42,7 @@ async function download (req, res) {
 
 	fileDownload.exists((err, exists)=>{
 		if (err) return res.status(403).send(err);
+		if (!exists) return res.status(403).send({code:'file_not_found', message:'O arquivo não foi encontrado no servidor.'});
 		fileDownload.createReadStream().pipe(res);
 	});
 }

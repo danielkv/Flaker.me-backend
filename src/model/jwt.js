@@ -18,7 +18,6 @@ function verify(token) {
 		try {
 			jwt.verify(token, process.env.PRIVATE_KEY, (err, decoded)=> {
 				if (err) throw err;
-				//console.log(decoded);
 				return resolve(decoded);
 			});
 		} catch (e) {
