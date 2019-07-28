@@ -4,3 +4,5 @@ uploads
 app.yaml
 credentials.*
 .env
+
+test.js

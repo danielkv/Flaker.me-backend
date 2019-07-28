@@ -23,7 +23,6 @@ async function addLifecycleRule(user, _rule={}) {
 		...UserSettings.getDefaults().lifecycle,
 		..._rule,
 	}
-	console.log(rule);
 	if (rule.condition.age > 0)
 		await bucket.addLifecycleRule(rule, {append:false});
 	else

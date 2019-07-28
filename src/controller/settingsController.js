@@ -24,7 +24,6 @@ async function update (req, res) {
 		res.send(req.new_settings);
 
 	} catch (e) {
-		console.log(e);
 		return res.status(403).send(e);
 	}
 }
