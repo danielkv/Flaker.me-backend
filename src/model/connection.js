@@ -3,11 +3,12 @@ const mysql = require('mysql');
 const connection_settings = {
 	connectionLimit 	: 10,
 	user     			: process.env.MYSQL_USER,
+	host				: process.env.MYSQL_HOST,
 	password 			: process.env.MYSQL_PASSWORD,
 	database 			: process.env.MYSQL_DB,
 }
 
-if (process.env.MYSQL_DSN) connection_settings.socketPath = `/cloudsql/${process.env.MYSQL_DSN}`;
+//if (process.env.MYSQL_DSN) connection_settings.socketPath = `/cloudsql/${process.env.MYSQL_DSN}`;
 
 const connection = mysql.createPool(connection_settings);
 

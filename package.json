@@ -1,6 +1,6 @@
 {
   "name": "flaker.me-backend",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "main": "./src/app.js",
   "repository": "https://github.com/danielkv/Google-Cloud.git",
   "author": "Daniel K. Guolo <daniel_kv@hotmail.com>",
