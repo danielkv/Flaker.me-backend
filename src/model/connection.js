@@ -12,6 +12,10 @@ const connection_settings = {
 
 const connection = mysql.createPool(connection_settings);
 
+connection.on('release', (conn)=> {
+	conn.destroy();
+})
+
 function formatFilter (filter) {
 	let formatted = '';
 	let filtered = Object.entries(filter).map(([key, value]) => {
