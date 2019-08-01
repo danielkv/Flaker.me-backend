@@ -84,7 +84,7 @@ async function authorize (email, password) {
 	if (user_exists.length != 1) throw {code: 'user_not_found', message:`Usuário não encontrado`};
 
 	user_exists = user_exists[0];
-	if (!user_exists.active) throw {code: 'inactive_user', message:'Usuário desativado'};
+	if (user_exists.active != true) throw {code: 'inactive_user', message:'Usuário inativo'};
 
 	const salted = salt(password, user_exists.salt);
 
@@ -112,7 +112,7 @@ async function authenticate (token) {
 	if (user_exists.length != 1) throw {code: 'user_not_found', message:`Usuário não encontrado`};
 
 	user_exists = user_exists[0];
-	if (!user_exists.active) throw {code: 'inactive_user', message:'Usuário desativado'};
+	if (user_exists.active != true) throw {code: 'inactive_user', message:'Usuário inativo'};
 
 	return user_exists;
 }

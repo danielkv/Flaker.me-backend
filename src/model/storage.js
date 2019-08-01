@@ -9,7 +9,7 @@ const storage = new Storage({
 });
 
 async function createBucket(user) {
-	const slug_name = myUtils.slugify(user.bucket_name || user.name);
+	const slug_name = myUtils.slugify(user.bucket_name || (user.name + '_flk_' + Math.round(Math.random()*1000*+1)));
 	const bucket = storage.bucket(slug_name);
 
 	await bucket.create({nearline:true});

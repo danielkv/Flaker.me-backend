@@ -28,8 +28,10 @@ async function verifyLimit (req, res, next) {
 	const finalSize = size + parseInt(filesize); //actual size + file to upload size
 	const userLimit = user.limit * 1024 * 1024 * 1024; // file size in bytes
 
-	if (user.limit !== 0 && finalSize >=  userLimit)
+	if (user.limit !== 0 && finalSize >=  userLimit) {
+		req.logToFile = 'O limite de armazenamento foi atingido';
 		return res.status(403).send({code:'limit_exceeded', message:'O limite de armazenamento foi atingido.'});
+	}
 
 	next();
 }
@@ -71,10 +73,12 @@ function createResumableUpload(req, res) {
 	_file.createResumableUpload((err, uri)=>{
 		if (err) res.status(403).send(err);
 
-		res.send({
+		const r = {
 			uri,
 			file : _file
-		});
+		}
+
+		res.send(r);
 	});
 }
 

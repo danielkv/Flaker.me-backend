@@ -1,9 +1,8 @@
 const Users = require('../model/users');
 const Storage = require('../model/storage');
-//const UserSettings = require('../model/userSettings');
 
 function create(req, res) {
-	const user = req.body.length ? req.body : req.query;
+	const user = Object.keys(req.body).length ? req.body : req.query;
 
 	Users.exists(user)
 	.then(Storage.createBucket)
@@ -14,13 +13,14 @@ function create(req, res) {
 		res.send(inserted) 
 	})
 	.catch((e)=> {
+		console.log(e);
 		res.status(403).send(e);
 	});
 }
 
 async function authorize(req, res, next) {
 	try {
-		const {email, password} = req.body;
+		const {email, password} = Object.keys(req.body).length ? req.body : req.query;
 		if (!email || !password) throw {code:'no_data', message:'Não foi enviado nenhuma informação para autenticação'};
 
 		const authorization = await Users.authorize(email, password);
