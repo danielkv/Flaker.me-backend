@@ -13,5 +13,6 @@ routes.post('/authenticate', Users.authenticate_endpoint);
 
 routes.get('/user/settings', Users.authenticate, Settings.load);
 routes.put('/user/settings', Users.authenticate, Storage.selectBucket, Settings.setupSettingsVars, Settings.setNewSettings, Settings.update);
+routes.put('/user', Users.update);
 
 module.exports = routes;

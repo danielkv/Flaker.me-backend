@@ -59,14 +59,24 @@ async function get (filter, fields) {
 async function update(user) {
 	return new Promise(async (resolve, reject) => {
 		try {
+			if (!user.id) throw new Error('Usuário não selecionado');
+			let inserts=[], sets='', sql, value;
+
+			Object.keys(user).forEach((key)=>{
+				if (key != 'id')
+				if (key == 'password') {
+					value = salt(user[key]);
+					inserts = [...inserts, 'password', value.password, 'salt', value.salt];
+					sets = (sets) ? ', ?? = ?, ?? = ?' : '?? = ?, ?? = ?';
+				} else {
+					value = user[key];
+					inserts = [...inserts, key, value];
+					sets = (sets) ? ', ?? = ?' : '?? = ?';
+				}
+			});
+
+			sql = 'UPDATE users SET '+sets+' WHERE `id` = '+user.id;
 			
-			if (!user.id) throw {code:'id_not_set', message:'O id do usuário não foi definido'};
-
-			let user_exists = await get({email : user.email, id:{value:user.id, compare:'!='}});
-			if (user_exists.length) throw {code: 'email_exists', message:`Esse email (${user.email}) já foi cadastrado no banco de dados`};
-
-			let inserts = ['name', user.name, 'limit', user.limit, 'email', user.email, 'active', user.active, 'id', user.id];
-			let sql = 'UPDATE users SET ?? = ?, ?? = ?, ?? = ?, ?? = ? WHERE ?? = ?';
 			sql = mysql.format(sql, inserts);
 
 			conn.query(sql, (error, results, fields) => {

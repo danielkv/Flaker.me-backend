@@ -61,10 +61,20 @@ async function authenticate_endpoint (req, res, next) {
 	}
 }
 
+function update (req, res, next) {
+	const data = req.query;
+
+	Users.update(data)
+	.then((result)=>{
+		res.send(result);
+	});
+}
+
 module.exports = {
 	authenticate_endpoint,
 	authenticate,
 	authorize,
+	update,
 
 	create,	
 }
