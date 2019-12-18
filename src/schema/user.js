@@ -1,12 +1,12 @@
-const conn = require('../services/connection');
+const { gql } = require('apollo-server');
 
 module.exports.typeDefs = gql`
 
 	type UserMeta {
-		id:ID!
-		meta_type:String!
-		meta_value:String!
-		createdAt:String!
+		id: ID!
+		key: String!
+		value: String!
+		createdAt: String!
 	}
 
 	type User {
@@ -27,16 +27,16 @@ module.exports.typeDefs = gql`
 		first_name: String
 		last_name: String
 		password: String
-		role:S tring
+		role: String
 		email: String
 		active: Boolean
 	}
 
 	input UserMetaInput {
-		id:ID
-		action:String! #create | update | delete
-		meta_type:String
-		meta_value:String
+		id: ID
+		action: String! #create | update | delete
+		key: String
+		value: String
 	}
 
 	type Login {
@@ -45,7 +45,7 @@ module.exports.typeDefs = gql`
 	}
 
 	extend type Mutation {
-		login (email: String!, password:S tring!): Login!
+		login (email: String!, password: String!): Login!
 		authenticate (token: String!): User!
 		
 		createUser (data: UserInput!): User!
@@ -54,8 +54,8 @@ module.exports.typeDefs = gql`
 		setUserRole (id: ID!, role_id: ID!): User!
 
 		removeUserAddress (id: ID!): Address!
-		updateUserAddress (id: ID!, data: UserAddressInput!): Address!
-		createUserAddress (data: UserAddressInput!): Address!
+		updateUserAddress (id: ID!, data: AddressInput!): Address!
+		createUserAddress (data: AddressInput!): Address!
 	}
 
 	extend type Query {

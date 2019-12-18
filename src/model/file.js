@@ -9,7 +9,7 @@ class File extends Sequelize.Model {};
 
 File.init({
 	name: Sequelize.STRING,
-	originalname: Sequelize.STRING,
+	originalName: Sequelize.STRING,
 	size: Sequelize.INTEGER,
 	url: Sequelize.TEXT,
 	hash: Sequelize.STRING,

@@ -31,7 +31,7 @@ class UserMeta extends Sequelize.Model {
 };
 
 UserMeta.init({
-	meta_type: {
+	key: {
 		type: Sequelize.STRING,
 		comment: 'phone | email | document | business_hours | address | ...',
 		set(val) {
@@ -54,7 +54,7 @@ UserMeta.init({
 			}
 		}
 	},
-	meta_value: Sequelize.TEXT,
+	value: Sequelize.TEXT,
 	unique: {
 		type: Sequelize.BOOLEAN,
 		defaultValue: false,

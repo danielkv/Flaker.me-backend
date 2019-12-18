@@ -1,5 +1,5 @@
-const {makeExecutableSchema, gql} = require('apollo-server');
-const {merge} = require('lodash');
+const { makeExecutableSchema, gql } = require('apollo-server');
+const { merge } = require('lodash');
 //const directives = require('./directives');
 
 //types

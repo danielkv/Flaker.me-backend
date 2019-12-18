@@ -6,7 +6,7 @@ module.exports.typeDefs = gql`
 		id:ID!
 		meta_type:String!
 		meta_value:String!
-		createdAt:String! @dateTime
+		createdAt:String!
 	}
 
 	type Company {
@@ -14,8 +14,8 @@ module.exports.typeDefs = gql`
 		name: String!
 		display_name: String!
 		active: Boolean!
-		createdAt: String! @dateTime
-		updatedAt: String! @dateTime
+		createdAt: String!
+		updatedAt: String!
 
 		metas: [CompanyMeta]!
 
@@ -37,12 +37,12 @@ module.exports.typeDefs = gql`
 		metas: [CompanyMetaInput]
 	}
 
-	extend type Mutation {
+	type Mutation {
 		createCompany(data: CompanyInput!): Company!
 		updateCompany(id: ID!, data: CompanyInput!): Company!
 	}
 
-	extend type Query {
+	type Query {
 		company(id: ID!): Company!
 	}
 `;
@@ -72,9 +72,6 @@ module.exports.resolvers = {
 		}
 	},
 	Query : {
-		companies: () => {
-			return Company.findAll();
-		},
 		company: (_, { id }) => {
 			return Company.findByPk(id)
 				.then(company => {
