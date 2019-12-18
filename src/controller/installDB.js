@@ -13,7 +13,7 @@ function install (req, res) {
 		await conn.query('SET FOREIGN_KEY_CHECKS = 0', { raw: true }).then(()=>conn.drop());
 		result += '<li>Dropped all tables</li>';
 
-		await conn.sync({force:true});
+		await conn.sync({ force: true });
 		result += '<li>Tables created</li>';
 		
 		/* if (req.query.installDefaults) {

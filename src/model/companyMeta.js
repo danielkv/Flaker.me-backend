@@ -59,7 +59,7 @@ CompanyMeta.init({
 		defaultValue: false,
 	},
 }, {
-	modelName: 'companyMetas', 
+	modelName: 'company_metas',
 	sequelize: conn,
 	name: { singular: 'meta', plural: 'metas' }
 });
