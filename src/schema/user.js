@@ -1,14 +1,6 @@
 const { gql } = require('apollo-server');
 
 module.exports.typeDefs = gql`
-
-	type UserMeta {
-		id: ID!
-		key: String!
-		value: String!
-		createdAt: String!
-	}
-
 	type User {
 		id: ID!
 		first_name: String!
@@ -19,7 +11,7 @@ module.exports.typeDefs = gql`
 		createdAt: String!
 		updatedAt: String!
 
-		metas: [UserMeta]!	
+		metas: [Meta]!
 		company: Company!
 	}
 
@@ -30,13 +22,7 @@ module.exports.typeDefs = gql`
 		role: String
 		email: String
 		active: Boolean
-	}
-
-	input UserMetaInput {
-		id: ID
-		action: String! #create | update | delete
-		key: String
-		value: String
+		metas: [MetaInput]
 	}
 
 	type Login {
@@ -45,17 +31,17 @@ module.exports.typeDefs = gql`
 	}
 
 	extend type Mutation {
-		login (email: String!, password: String!): Login!
-		authenticate (token: String!): User!
+		login(email: String!, password: String!): Login!
+		authenticate(token: String!): User!
 		
-		createUser (data: UserInput!): User!
-		updateUser (id:ID!, data:UserInput!): User!
+		createUser(data: UserInput!): User!
+		updateUser(id:ID!, data:UserInput!): User!
 		
-		setUserRole (id: ID!, role_id: ID!): User!
+		setUserRole(id: ID!, role_id: ID!): User!
 
-		removeUserAddress (id: ID!): Address!
-		updateUserAddress (id: ID!, data: AddressInput!): Address!
-		createUserAddress (data: AddressInput!): Address!
+		removeUserAddress(id: ID!): Address!
+		updateUserAddress(id: ID!, data: AddressInput!): Address!
+		createUserAddress(data: AddressInput!): Address!
 	}
 
 	extend type Query {

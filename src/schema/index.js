@@ -6,6 +6,7 @@ const { merge } = require('lodash');
 const {typeDefs: Company, resolvers: companyResolvers} = require('./company');
 const {typeDefs: User, resolvers: userResolvers} = require('./user');
 const {typeDefs: File, resolvers: fileResolvers} = require('./file');
+const {typeDefs: Meta, resolvers: metaResolvers} = require('./meta');
 
 const {typeDefs: Address, resolvers: addressResolvers} = require('./address');
 const {typeDefs: Phone, resolvers: phoneResolvers} = require('./phone');
@@ -33,7 +34,7 @@ const typeDefs = gql`
 const resolvers = {}
 
 module.exports = makeExecutableSchema({
-	typeDefs : [typeDefs, Company, User, File, Address, Phone],
-	resolvers : merge(resolvers, companyResolvers, userResolvers, fileResolvers, addressResolvers, phoneResolvers),
+	typeDefs : [typeDefs, Company, User, File, Address, Phone, Meta],
+	resolvers : merge(resolvers, companyResolvers, userResolvers, fileResolvers, addressResolvers, phoneResolvers, metaResolvers),
 	//directiveResolvers : directives,
 })

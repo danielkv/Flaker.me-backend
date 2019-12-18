@@ -2,13 +2,6 @@ const { gql } = require('apollo-server');
 const { Company } = require('../model')
 
 module.exports.typeDefs = gql`
-	type CompanyMeta {
-		id:ID!
-		meta_type:String!
-		meta_value:String!
-		createdAt:String!
-	}
-
 	type Company {
 		id: ID!
 		name: String!
@@ -17,24 +10,17 @@ module.exports.typeDefs = gql`
 		createdAt: String!
 		updatedAt: String!
 
-		metas: [CompanyMeta]!
+		metas: [Meta]!
 
 		users(filter: Filter, pagination: Pagination): [User]!
 		files(filter: Filter, pagination: Pagination): [File]!
-	}
-	
-	input CompanyMetaInput {
-		id: ID
-		action: String! #create | update | delete
-		meta_type: String
-		meta_value: String
 	}
 
 	input CompanyInput {
 		name: String
 		display_name: String
 		active: Boolean
-		metas: [CompanyMetaInput]
+		metas: [MetaInput]
 	}
 
 	type Mutation {
