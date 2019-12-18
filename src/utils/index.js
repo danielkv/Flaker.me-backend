@@ -1,4 +1,25 @@
+const crypto = require('crypto');
 
+/*
+ * Cria o salt para ser adicionado/verificar senha do usuário
+ *
+ */
+function salt(password, salt=null) {
+	const _salt = salt || crypto.randomBytes(16).toString('hex');
+	var hash = crypto.createHmac('sha512', _salt);
+	hash.update(password);
+	let _password = hash.digest('hex');
+	return {
+		password:_password,
+		salt:_salt,
+	}
+}
+
+/*
+ * Retira todos acentos, converte espaços em hífens e
+ * transforma texto em minúsculo
+ * 
+ */
 function slugify(text) {
 	text = text.trim().toLowerCase();
 
@@ -16,4 +37,5 @@ function slugify(text) {
 
 module.exports = {
 	slugify,
+	salt,
 }
