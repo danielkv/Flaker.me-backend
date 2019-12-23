@@ -14,7 +14,7 @@ const app = express();
 // inicializa Apollo Server
 const server = new ApolloServer({
 	schema,
-	context : async ({req, connection}) => {
+	/* context : async ({req, connection}) => {
 		let ctx = {};
 
 		if (connection) {
@@ -36,7 +36,7 @@ const server = new ApolloServer({
 		}
 
 		return ctx;
-	},
+	}, */
 });
 
 // setup cors

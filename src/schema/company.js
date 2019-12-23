@@ -1,5 +1,5 @@
 const { gql } = require('apollo-server');
-const { Company } = require('../model')
+const { Company, CompanyMeta } = require('../model')
 
 module.exports.typeDefs = gql`
 	type Company {
@@ -37,23 +37,23 @@ module.exports.resolvers = {
 	Mutation : {
 		createCompany: (_, { data }) => {
 			return sequelize.transaction(transaction => {
-				return Companies.create(data, {include:[CompaniesMeta], transaction})
+				return Companies.create(data, { include: [CompaniesMeta], transaction })
 			})
 		},
 		updateCompany: (_, { id, data }) => {
 			return sequelize.transaction(transaction => {
 				return Companies.findByPk(id)
-				.then(company=>{
-					if (!company) throw new Error('Empresa não encontrada');
+					.then(company => {
+						if (!company) throw new Error('Empresa não encontrada');
 
-					return company.update(data, { fields: ['name', 'display_name', 'active'], transaction })
-				})
-				.then(async (company_updated) => {
-					if (data.metas) {
-						await CompaniesMeta.updateAll(data.metas, company_updated, transaction);
-					}
-					return company_updated;
-				})
+						return company.update(data, { fields: ['name', 'display_name', 'active'], transaction })
+					})
+					.then(async (company_updated) => {
+						if (data.metas) {
+							await CompanyMeta.updateAll(data.metas, company_updated, transaction);
+						}
+						return company_updated;
+					})
 			})
 		}
 	},
@@ -67,15 +67,16 @@ module.exports.resolvers = {
 				});
 		}
 	},
+	
 	Company: {
-		metas: () => {
-			
+		metas: (parent) => {
+			return parent.getMetas();
 		},
-		users: () => {
-
+		users: (parent) => {
+			return parent.getMetas();
 		},
-		files: () => {
-
+		files: (parent) => {
+			return parent.getFiles();
 		},
 	}
 }

@@ -25,7 +25,7 @@ async function verifyLimit (req, res, next) {
 		return res.status(403).send(e);
 	});
 
-	const finalSize = size + parseInt(filesize); //actual size + file to upload size
+	const finalSize = size + parseInt(filesize); // actual size + file to upload size
 	const userLimit = user.limit * 1024 * 1024 * 1024; // file size in bytes
 
 	if (user.limit !== 0 && finalSize >=  userLimit) {

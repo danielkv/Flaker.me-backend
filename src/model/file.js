@@ -12,6 +12,7 @@ File.init({
 	originalName: Sequelize.STRING,
 	size: Sequelize.INTEGER,
 	url: Sequelize.TEXT,
+	bucket: Sequelize.STRING,
 	hash: Sequelize.STRING,
 	deleted: {
 		type: Sequelize.BOOLEAN,

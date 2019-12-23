@@ -1,10 +1,12 @@
 const { gql } = require('apollo-server');
+const { User, UserMeta } = require('../model');
+const { salt } = require('../utils');
 
 module.exports.typeDefs = gql`
 	type User {
 		id: ID!
-		first_name: String!
-		last_name: String!
+		firstName: String!
+		lastName: String!
 		email: String!
 		role: String!
 		active: Boolean!
@@ -16,8 +18,8 @@ module.exports.typeDefs = gql`
 	}
 
 	input UserInput {
-		first_name: String
-		last_name: String
+		firstName: String
+		lastName: String
 		password: String
 		role: String
 		email: String
@@ -63,25 +65,7 @@ module.exports.resolvers = {
 	},
 	Mutation : {
 		createUser: (_, { data }, ctx) => {
-			return sequelize.transaction(async transaction => {
-				await ctx.company.getUsers({where:{email:data.email}})
-					.then((users)=>{
-						if (users.length) throw new Error('Já existe um usuário com esse email')
-					})
-
-				return Users.create(data, {include:[UsersMeta], transaction})
-					.then(async (user_created)=> {
-						await ctx.company.addUser(user_created, {through:{...data.assigned_company}, transaction});
-
-						return user_created;
-					})
-					.then(async (user_created)=> {
-						if (data.assigned_branches) {
-							await Branches.assignAll(data.assigned_branches, user_created, transaction);
-						}
-						return user_created;
-					})
-			});
+			return ctx.company.createUser(data, { include: [UserMeta] });
 		},
 		updateUser: (_, { id, data }) => {
 			return sequelize.transaction(transaction => {
@@ -89,43 +73,26 @@ module.exports.resolvers = {
 					.then(user=>{
 						if (!user) throw new Error('Usuário não encontrada');
 
-						return user.update(data, { fields: ['first_name', 'last_name', 'password', 'role', 'active'], transaction })
+						return user.update(data, { fields: ['first_name', 'last_name', 'password', 'active'], transaction })
 					})
 					.then(async (user_updated) => {
 						if (data.metas) {
-							await UsersMeta.updateAll(data.metas, user_updated, transaction);
-						}
-						return user_updated;
-					})
-					.then(async (user_updated)=> {
-						await ctx.company.addUser(user_updated, {through:{...data.assigned_company}, transaction});
-
-						return user_updated;
-					})
-					.then(async (user_updated)=> {
-						if (data.assigned_branches) {
-							await Branches.assignAll(data.assigned_branches, user_updated, transaction);
+							await UserMeta.updateAll(data.metas, user_updated, transaction);
 						}
 						return user_updated;
 					})
 			})
 		},
-		setUserRole : (_, { id, role_id }, ctx) => {
-			return ctx.branch.getUsers({where:{id}})
-				.then(async ([user])=>{
-					if (!user || !user.branch_relation) throw new Error('Usuário não encontrada');
-					const role = await Roles.findByPk(role_id);
-					if (!role) throw new Error('Função não encontrada');
+		setUserRole : (_, { id, role }, ctx) => {
+			return User.findByPk(id)
+				.then((user) => {
+					if (!user) throw new Error('Usuário não encontrada');
 
-					await user.branch_relation.setRole(role);
-					
-					return user;
+					return user.update({ role }, { fields: ['role'] });
 				});
 		},
 		login: (_, { email, password }) => {
-			return User.findOne({
-				where : {email},
-			})
+			return User.findOne({ where: { email } })
 				.then ((user_found)=>{
 					//Verifica se encontrou usuário
 					if (!user_found) throw new Error('Usuário não encotrado');
@@ -190,7 +157,13 @@ module.exports.resolvers = {
 				})
 		},
 	},
+	
 	User: {
-		
+		metas: (parent) => {
+			return parent.getMetas();
+		},
+		company: (parent) => {
+			return parent.getCompany();
+		}
 	}
 }
