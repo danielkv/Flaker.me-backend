@@ -6,3 +6,4 @@ credentials.*
 .env
 
 test.js
+yarn.lock
