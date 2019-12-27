@@ -1,6 +1,7 @@
 const { gql } = require('apollo-server');
 const { User, UserMeta } = require('../model');
 const { salt } = require('../utils');
+const jwt = require('jsonwebtoken');
 
 module.exports.typeDefs = gql`
 	type User {
@@ -94,30 +95,27 @@ module.exports.resolvers = {
 		login: (_, { email, password }) => {
 			return User.findOne({ where: { email } })
 				.then ((user_found)=>{
-					//Verifica se encontrou usuário
+					// verifies if user exists
 					if (!user_found) throw new Error('Usuário não encotrado');
 			
-					//gera token com senha recebidos e salt encontrado e verifica se token salvo é igual
+					// gera token com senha recebidos e salt encontrado e verifica se token salvo é igual
 					const salted = salt(password, user_found.salt);
 					if (user_found.password != salted.password) throw new Error('Senha incorreta');
 					
-					//Gera webtoken com id e email
+					// generates webtoken with id e email
 					const token = jwt.sign({
-						id: user_found.id,
-						email: user_found.email,
-					}, process.env.SECRET);
-					
-					//Retira campos para retornar usuário
-					const authorized = user_found.get();
+						id: user_found.get('id'),
+						email: user_found.get('email'),
+					}, process.env.PRIVATE_KEY);
 			
 					return {
 						token,
-						user:authorized,
+						user: user_found,
 					};
 				});
 		},
 		authenticate: (_, { token }) => {
-			const { id, email } = jwt.verify(token, process.env.SECRET);
+			const { id, email } = jwt.verify(token, process.env.PRIVATE_KEY);
 
 			return User.findAll({ where: { id, email } })
 				.then(([user_found])=>{
@@ -149,7 +147,6 @@ module.exports.resolvers = {
 		createUserAddress: (parent, { data }, ctx) => {
 			return ctx.user.createMeta({ meta_type: 'address', meta_value: JSON.stringify(data) })
 				.then((meta_address) => {
-					console.log(meta_address.get());
 					return {
 						id: meta_address.get('id'),
 						...JSON.parse(meta_address.get('meta_value'))
