@@ -1,4 +1,4 @@
-import { Model, STRING, BOOLEAN } from 'sequelize';
+import Sequelize from 'sequelize';
 
 import conn from '../services/connection';
 import { salt } from '../utils';
@@ -7,7 +7,7 @@ import { salt } from '../utils';
  * Define modelo (tabela) de usuários
  */
 
-class User extends Model {
+class User extends Sequelize.Model {
 
 	/**
 	 * Verifica as permissões de um usuário
@@ -34,11 +34,11 @@ class User extends Model {
 }
 
 User.init({
-	firstName: STRING,
-	lastName: STRING,
-	email: STRING,
+	firstName: Sequelize.STRING,
+	lastName: Sequelize.STRING,
+	email: Sequelize.STRING,
 	password: {
-		type: STRING,
+		type: Sequelize.STRING,
 		allowNull:false,
 		set(val) {
 			//Adiciona o salt para salvar a senha do usuário
@@ -47,13 +47,13 @@ User.init({
 			this.setDataValue('salt', salted.salt);
 		}
 	},
-	salt: STRING,
+	salt: Sequelize.STRING,
 	active: {
-		type: BOOLEAN,
+		type: Sequelize.BOOLEAN,
 		defaultValue: true,
 	},
 	role: {
-		type: STRING,
+		type: Sequelize.STRING,
 		defaultValue: 'customer',
 		allowNull: false,
 		comment: 'master | adm | customer | default'
@@ -63,4 +63,4 @@ User.init({
 	sequelize: conn,
 });
 
-export default User;
+module.exports = User;

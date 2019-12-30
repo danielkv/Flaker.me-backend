@@ -24,7 +24,7 @@ export default async ({ req, connection }) => {
 
 	// check company
 	if (user && company_id) {
-		user.getCompany({ where: { id: company_id } });
+		company = user.getCompany({ where: { id: company_id } });
 	}
 	
 	return {

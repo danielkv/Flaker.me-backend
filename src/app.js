@@ -3,20 +3,20 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
 
-import authorization from './controller/authorization';
+import authentication from './controller/authentication';
 import router from './router';
 import schema from './schema/';
 
 dotenv.config();
 
 // eslint-disable-next-line no-undef
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 4000;
 const app = express();
 
 // inicializa Apollo Server
 const server = new ApolloServer({
 	schema,
-	context: authorization
+	context: authentication
 });
 
 // setup cors

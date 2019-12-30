@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server';
 import { sign, verify } from 'jsonwebtoken';
 
-import { User, UserMeta } from '../model';
+import models from '../model';
 import { salt } from '../utils';
 
 
@@ -97,7 +97,8 @@ export const resolvers = {
 				});
 		},
 		login: (_, { email, password }) => {
-			return User.findOne({ where: { email } })
+			console.log(models);
+			return models.User.findOne({ where: { email } })
 				.then ((user_found)=>{
 					// verifies if user exists
 					if (!user_found) throw new Error('Usuário não encotrado');
