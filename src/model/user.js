@@ -13,6 +13,7 @@ class User extends Sequelize.Model {
 	 * Verifica as permissões de um usuário
 	 */
 	can(perms, options={}) {
+		// eslint-disable-next-line no-param-reassign
 		if (!Array.isArray(perms)) perms = [perms];
 		if (!this.permissions) throw new Error('As permissões não foram definidas');
 		
@@ -63,4 +64,4 @@ User.init({
 	sequelize: conn,
 });
 
-module.exports = User;
+export default User;

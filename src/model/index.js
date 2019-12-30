@@ -14,11 +14,3 @@ User.hasMany(UserMeta);
 UserMeta.belongsTo(User);
 User.hasMany(File);
 File.belongsTo(User);
-
-export default {
-	Company,
-	CompanyMeta,
-	User,
-	UserMeta,
-	File,
-}

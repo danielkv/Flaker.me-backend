@@ -1,7 +1,9 @@
 import { gql } from 'apollo-server';
 import { sign, verify } from 'jsonwebtoken';
 
-import models from '../model';
+import User from '../model/user';
+import UserMeta from '../model/userMeta';
+import conn from '../services/connection';
 import { salt } from '../utils';
 
 
@@ -73,7 +75,7 @@ export const resolvers = {
 			return ctx.company.createUser(data, { include: [UserMeta]});
 		},
 		updateUser: (_, { id, data }) => {
-			return sequelize.transaction(transaction => {
+			return conn.transaction(transaction => {
 				return User.findByPk(id)
 					.then(user=>{
 						if (!user) throw new Error('Usuário não encontrada');
@@ -88,7 +90,7 @@ export const resolvers = {
 					})
 			})
 		},
-		setUserRole : (_, { id, role }, ctx) => {
+		setUserRole : (_, { id, role }) => {
 			return User.findByPk(id)
 				.then((user) => {
 					if (!user) throw new Error('Usuário não encontrada');
@@ -97,8 +99,7 @@ export const resolvers = {
 				});
 		},
 		login: (_, { email, password }) => {
-			console.log(models);
-			return models.User.findOne({ where: { email } })
+			return User.findOne({ where: { email } })
 				.then ((user_found)=>{
 					// verifies if user exists
 					if (!user_found) throw new Error('Usuário não encotrado');
@@ -111,6 +112,7 @@ export const resolvers = {
 					const token = sign({
 						id: user_found.get('id'),
 						email: user_found.get('email'),
+					// eslint-disable-next-line no-undef
 					}, process.env.PRIVATE_KEY);
 			
 					return {
@@ -120,6 +122,7 @@ export const resolvers = {
 				});
 		},
 		authenticate: (_, { token }) => {
+			// eslint-disable-next-line no-undef
 			const { id, email } = verify(token, process.env.PRIVATE_KEY);
 
 			return User.findAll({ where: { id, email } })

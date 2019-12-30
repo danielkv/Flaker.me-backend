@@ -1,7 +1,7 @@
 import { AuthenticationError } from 'apollo-server';
 import { verify } from 'jsonwebtoken';
 
-import { User } from '../model';
+import User from '../model/user';
 
 export default async ({ req, connection }) => {
 	// if subscription
@@ -19,7 +19,10 @@ export default async ({ req, connection }) => {
 		// eslint-disable-next-line no-undef
 		const { id, email } = verify(token, process.env.PRIVATE_KEY);
 
-		user = await User.findAll({ where: { id, email } });
+		user = await User.findByPk(id)
+			.then((user_found)=>{
+				return user_found.get('email') === email ? user : null;
+			});
 	}
 
 	// check company

@@ -4,7 +4,7 @@ import { randomBytes, createHmac } from 'crypto';
  * Cria o salt para ser adicionado/verificar senha do usuário
  *
  */
-function salt(password, salt=null) {
+export function salt(password, salt=null) {
 	const _salt = salt || randomBytes(16).toString('hex');
 	var hash = createHmac('sha512', _salt);
 	hash.update(password);
@@ -20,7 +20,7 @@ function salt(password, salt=null) {
  * transforma texto em minúsculo
  * 
  */
-function slugify(text) {
+export function slugify(text) {
 	let newText = text.trim().toLowerCase();
 
 	newText = newText.replace(new RegExp('[ÁÀÂÃ][áàâã]','gi'), 'a');
@@ -33,9 +33,4 @@ function slugify(text) {
 	
 	newText = newText.replace(new RegExp(' - | ', 'g'), '-');
 	return newText;
-}
-
-export default {
-	slugify,
-	salt,
 }
