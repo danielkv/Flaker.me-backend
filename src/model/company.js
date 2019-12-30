@@ -1,18 +1,23 @@
-const conn = require('../services/connection');
-const Sequelize = require('sequelize');
+import { Model, STRING, INTEGER, BOOLEAN } from 'sequelize';
+
+import conn from '../services/connection';
 
 /*
  * Define modelo (tabela) de empresas
  */
 
-class Company extends Sequelize.Model {}
+class Company extends Model {}
 
 Company.init({
-	name: Sequelize.STRING,
-	displayName: Sequelize.STRING,
-	email: Sequelize.STRING,
+	name: STRING,
+	displayName: STRING,
+	email: STRING,
+	limit: {
+		type: INTEGER,
+		defaultValue: 512000,
+	},
 	active: {
-		type: Sequelize.BOOLEAN,
+		type: BOOLEAN,
 		defaultValue: true,
 	},
 }, {
@@ -20,4 +25,4 @@ Company.init({
 	sequelize: conn,
 });
 
-module.exports = Company;
+export default Company;

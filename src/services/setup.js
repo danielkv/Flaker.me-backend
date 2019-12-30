@@ -1,5 +1,6 @@
 // inicia o banco de dados (sequelize)
-require('./connection');
+// inicia o banco de dados (sequelize)
+import './connection';
 
 // define os módulos (tabelas)
-require('../model/index');
+import '../model/index';

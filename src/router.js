@@ -1,5 +1,6 @@
-const { Router } = require('express');
-const installDataBase = require('./controller/installDB');
+import { Router } from 'express';
+
+import installDataBase from './controller/installDB';
 
 const router = Router();
 
@@ -13,4 +14,4 @@ router.get('/networkTest', (req, res) => {
 // rota de instalação
 router.get('/setup', installDataBase);
 
-module.exports = router;
+export default router;

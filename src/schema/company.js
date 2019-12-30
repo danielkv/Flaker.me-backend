@@ -1,7 +1,8 @@
-const { gql } = require('apollo-server');
-const { Company, CompanyMeta } = require('../model')
+import { gql } from 'apollo-server';
 
-module.exports.typeDefs = gql`
+import { Company, CompanyMeta } from '../model'
+
+export const typeDefs = gql`
 	type Company {
 		id: ID!
 		name: String!
@@ -13,7 +14,6 @@ module.exports.typeDefs = gql`
 		metas: [Meta]!
 
 		users(filter: Filter, pagination: Pagination): [User]!
-		files(filter: Filter, pagination: Pagination): [File]!
 	}
 
 	input CompanyInput {
@@ -33,7 +33,7 @@ module.exports.typeDefs = gql`
 	}
 `;
 
-module.exports.resolvers = {
+export const resolvers = {
 	Mutation : {
 		createCompany: (_, { data }) => {
 			return sequelize.transaction(transaction => {
@@ -74,9 +74,6 @@ module.exports.resolvers = {
 		},
 		users: (parent) => {
 			return parent.getMetas();
-		},
-		files: (parent) => {
-			return parent.getFiles();
-		},
+		}
 	}
 }

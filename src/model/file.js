@@ -1,21 +1,22 @@
-const conn = require('../services/connection');
-const Sequelize = require('sequelize');
+import { Model, STRING, INTEGER, TEXT, BOOLEAN } from 'sequelize';
+
+import conn from '../services/connection';
 
 /*
  * Define modelo (tabela) de arquivos
  */
 
-class File extends Sequelize.Model {};
+class File extends Model {};
 
 File.init({
-	name: Sequelize.STRING,
-	originalName: Sequelize.STRING,
-	size: Sequelize.INTEGER,
-	url: Sequelize.TEXT,
-	bucket: Sequelize.STRING,
-	hash: Sequelize.STRING,
+	name: STRING,
+	originalName: STRING,
+	size: INTEGER,
+	url: TEXT,
+	bucket: STRING,
+	hash: STRING,
 	deleted: {
-		type: Sequelize.BOOLEAN,
+		type: BOOLEAN,
 		defaultValue: false,
 	},
 },{
@@ -23,4 +24,4 @@ File.init({
 	sequelize: conn,
 });
 
-module.exports = File;
+export default File;

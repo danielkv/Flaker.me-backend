@@ -1,9 +1,11 @@
-const { gql } = require('apollo-server');
-const { File } = require('../model');
-const { format } = require('util');
-const { generateNewFileName } = require('../utils/files');
+import { gql } from 'apollo-server';
+import { format } from 'util';
 
-module.exports.typeDefs = gql`
+import { File } from '../model';
+import { generateNewFileName } from '../utils/files';
+
+
+export const typeDefs = gql`
 
 	type File {
 		id: ID!
@@ -31,23 +33,31 @@ module.exports.typeDefs = gql`
 
 	extend type Query {
 		file(id: ID!): File!
+
+		requestUploadUri(originalName: String!): String!
 	}
 
 	extend type Mutation {
 		createFile(data: FileInput!): File!
 		updateFile(id: ID!, data: FileInput!): File!
-
-		generateUploadUrl(originalName: String!): String!
 	}
 `;
 
-module.exports.resolvers = {
+export const resolvers = {
 	Query: {
 		file: (_, { id }) => {
 			return File.findByPk(id)
 				.then(file => {
 					if (!file) throw new Error('Arquivo não encontrado')
 				})
+		},
+		requestUploadUri: async (_, { originalName }, ctx) => {
+			const newFileName = generateNewFileName(originalName);
+			const newFile = ctx.bucket.file(newFileName);
+
+			const uri = await newFile.createResumableUpload();
+
+			return uri;
 		}
 	},
 
@@ -64,20 +74,11 @@ module.exports.resolvers = {
 				.then(file => {
 					if (!file) throw new Error('Arquivo não encontrado');
 
-					return file.update(data, { fields: ['deleted'] })
+					return file.update(data, { fields: ['deleted']})
 				})
 		},
-		generateUploadUrl: (_, originalName, ctx) => {
-			const newFileName = generateNewFileName(originalName);
-			const newFile = ctx.bucket.file(newFileName);
-
-			newFile.createResumableUpload((err, uri)=>{
-				if (err) throw new Error(err);
-
-				return uri;
-			});
-		}
 	},
+
 
 	File: {
 		company: (parent) => {

@@ -1,11 +1,13 @@
-const conn = require('../services/connection');
-const Sequelize = require('sequelize');
+import { Model, STRING, TEXT, BOOLEAN } from 'sequelize';
+
+import conn from '../services/connection';
+
 
 /*
  * Define modelo (tabela) para metas das empresas
  */
 
-class CompanyMeta extends Sequelize.Model {
+class CompanyMeta extends Model {
 	/**
 	 * Atualiza, Remove e Cria todas metas
 	 * 
@@ -18,8 +20,8 @@ class CompanyMeta extends Sequelize.Model {
 		
 		const [removed, created, updated] = await Promise.all([
 			CompanyMeta.destroy({ where: { id: metas_remove.map(r => r.id) }, transaction }).then(() => metas_remove),
-			Promise.all(metas_create.map(row => model_instance.createMeta(row, {transaction}))),
-			Promise.all(metas_update.map(row => model_instance.getMetas({where:{id:row.id}}).then(([meta]) => {if (!meta) throw new Error('Esse metadado não pertence a essa empresa'); return meta.update(row, {fields:['meta_value'], transaction})})))
+			Promise.all(metas_create.map(row => model_instance.createMeta(row, { transaction }))),
+			Promise.all(metas_update.map(row => model_instance.getMetas({ where:{ id:row.id } }).then(([meta]) => {if (!meta) throw new Error('Esse metadado não pertence a essa empresa'); return meta.update(row, { fields:['meta_value'], transaction })})))
 		]);
 
 		return {
@@ -31,18 +33,18 @@ class CompanyMeta extends Sequelize.Model {
 };
 CompanyMeta.init({
 	key: {
-		type: Sequelize.STRING,
+		type: STRING,
 		comment: 'phone | email | document | business_hours | address | ...',
 		set(val) {
 			const unique_types = ['document', 'business_hours'];
 			if (unique_types.includes(val))
 				this.setDataValue('unique', true);
 			
-			this.setDataValue('meta_type', val);
+			this.setDataValue('key', val);
 		},
 		validate : {
 			async isUnique (value, done) {
-				const meta = await CompaniesMeta.findOne({ where: { company_id: this.getDataValue('company_id'), meta_type: value } });
+				const meta = await CompanyMeta.findOne({ where: { companyId: this.getDataValue('companyId'), key: value } });
 				const unique = this.getDataValue('unique');
 				if (meta) {
 					if (meta.unique === true) return done(new Error('Esse metadado já existe, você pode apenas altera-lo'));
@@ -53,9 +55,9 @@ CompanyMeta.init({
 			}
 		}
 	},
-	value: Sequelize.TEXT,
+	value: TEXT,
 	unique: {
-		type: Sequelize.BOOLEAN,
+		type: BOOLEAN,
 		defaultValue: false,
 	},
 }, {
@@ -64,4 +66,4 @@ CompanyMeta.init({
 	name: { singular: 'meta', plural: 'metas' }
 });
 
-module.exports = CompanyMeta;
+export default CompanyMeta;

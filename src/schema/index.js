@@ -1,15 +1,13 @@
-const { makeExecutableSchema, gql } = require('apollo-server');
-const { merge } = require('lodash');
-//const directives = require('./directives');
+import { makeExecutableSchema, gql } from 'apollo-server';
+import { merge } from 'lodash';
 
 //types
-const {typeDefs: Company, resolvers: companyResolvers} = require('./company');
-const {typeDefs: User, resolvers: userResolvers} = require('./user');
-const {typeDefs: File, resolvers: fileResolvers} = require('./file');
-const {typeDefs: Meta, resolvers: metaResolvers} = require('./meta');
-
-const {typeDefs: Address, resolvers: addressResolvers} = require('./address');
-const {typeDefs: Phone, resolvers: phoneResolvers} = require('./phone');
+import { typeDefs as Address, resolvers as addressResolvers } from './address';
+import { typeDefs as Company, resolvers as companyResolvers } from './company';
+import { typeDefs as File, resolvers as fileResolvers } from './file';
+import { typeDefs as Meta, resolvers as metaResolvers } from './meta';
+import { typeDefs as Phone, resolvers as phoneResolvers } from './phone';
+import { typeDefs as User, resolvers as userResolvers } from './user';
 
 const typeDefs = gql`
 	#directive @isAuthenticated on FIELD | FIELD_DEFINITION
@@ -33,7 +31,7 @@ const typeDefs = gql`
 
 const resolvers = {}
 
-module.exports = makeExecutableSchema({
+export default makeExecutableSchema({
 	typeDefs : [typeDefs, Company, User, File, Address, Phone, Meta],
 	resolvers : merge(resolvers, companyResolvers, userResolvers, fileResolvers, addressResolvers, phoneResolvers, metaResolvers),
 	//directiveResolvers : directives,

@@ -1,9 +1,11 @@
-const { gql } = require('apollo-server');
-const { User, UserMeta } = require('../model');
-const { salt } = require('../utils');
-const jwt = require('jsonwebtoken');
+import { gql } from 'apollo-server';
+import { sign, verify } from 'jsonwebtoken';
 
-module.exports.typeDefs = gql`
+import { User, UserMeta } from '../model';
+import { salt } from '../utils';
+
+
+export const typeDefs = gql`
 	type User {
 		id: ID!
 		firstName: String!
@@ -16,6 +18,8 @@ module.exports.typeDefs = gql`
 
 		metas: [Meta]!
 		company: Company!
+		files: [File]!
+		settings: [Meta]!
 	}
 
 	input UserInput {
@@ -53,7 +57,7 @@ module.exports.typeDefs = gql`
 
 `;
 
-module.exports.resolvers = {
+export const resolvers = {
 	Query : {
 		user: (_, { id }) => {
 			return User.findByPk(id)
@@ -66,7 +70,7 @@ module.exports.resolvers = {
 	},
 	Mutation : {
 		createUser: (_, { data }, ctx) => {
-			return ctx.company.createUser(data, { include: [UserMeta] });
+			return ctx.company.createUser(data, { include: [UserMeta]});
 		},
 		updateUser: (_, { id, data }) => {
 			return sequelize.transaction(transaction => {
@@ -89,7 +93,7 @@ module.exports.resolvers = {
 				.then((user) => {
 					if (!user) throw new Error('Usuário não encontrada');
 
-					return user.update({ role }, { fields: ['role'] });
+					return user.update({ role }, { fields: ['role']});
 				});
 		},
 		login: (_, { email, password }) => {
@@ -103,7 +107,7 @@ module.exports.resolvers = {
 					if (user_found.password != salted.password) throw new Error('Senha incorreta');
 					
 					// generates webtoken with id e email
-					const token = jwt.sign({
+					const token = sign({
 						id: user_found.get('id'),
 						email: user_found.get('email'),
 					}, process.env.PRIVATE_KEY);
@@ -115,7 +119,7 @@ module.exports.resolvers = {
 				});
 		},
 		authenticate: (_, { token }) => {
-			const { id, email } = jwt.verify(token, process.env.PRIVATE_KEY);
+			const { id, email } = verify(token, process.env.PRIVATE_KEY);
 
 			return User.findAll({ where: { id, email } })
 				.then(([user_found])=>{
@@ -131,7 +135,7 @@ module.exports.resolvers = {
 
 					const removed = await address_found.destroy();
 
-					return {id, ...JSON.parse(removed.meta_value)};
+					return { id, ...JSON.parse(removed.meta_value) };
 				})
 		},
 		updateUserAddress: (parent, { id, data }, ctx) => {
@@ -141,7 +145,7 @@ module.exports.resolvers = {
 					
 					const updated = await address_found.update({ meta_value: JSON.stringify(data) })
 					
-					return {id, ...JSON.parse(updated.meta_value)};
+					return { id, ...JSON.parse(updated.meta_value) };
 				});
 		},
 		createUserAddress: (parent, { data }, ctx) => {
@@ -161,6 +165,12 @@ module.exports.resolvers = {
 		},
 		company: (parent) => {
 			return parent.getCompany();
-		}
+		},
+		files: (parent) => {
+			return parent.getFiles({ where: { deleted: false } });
+		},
+		settings: (parent) => {
+			return parent.getMetas({ where: { key: ['watch', 'bucket']} });
+		},
 	}
 }

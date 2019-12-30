@@ -1,8 +1,8 @@
-const Company = require('./company');
-const CompanyMeta = require('./companyMeta');
-const User = require('./user');
-const UserMeta = require('./userMeta');
-const File = require('./file');
+import Company from './company';
+import CompanyMeta from './companyMeta';
+import File from './file';
+import User from './user';
+import UserMeta from './userMeta';
 
 Company.hasMany(User);
 User.belongsTo(Company);
@@ -12,11 +12,10 @@ CompanyMeta.belongsTo(Company);
 
 User.hasMany(UserMeta);
 UserMeta.belongsTo(User);
+User.hasMany(File);
+File.belongsTo(User);
 
-Company.hasMany(File);
-File.belongsTo(Company);
-
-module.exports = {
+export default {
 	Company,
 	CompanyMeta,
 	User,

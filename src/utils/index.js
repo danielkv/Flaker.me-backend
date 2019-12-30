@@ -1,12 +1,12 @@
-const crypto = require('crypto');
+import { randomBytes, createHmac } from 'crypto';
 
 /*
  * Cria o salt para ser adicionado/verificar senha do usuário
  *
  */
 function salt(password, salt=null) {
-	const _salt = salt || crypto.randomBytes(16).toString('hex');
-	var hash = crypto.createHmac('sha512', _salt);
+	const _salt = salt || randomBytes(16).toString('hex');
+	var hash = createHmac('sha512', _salt);
 	hash.update(password);
 	let _password = hash.digest('hex');
 	return {
@@ -21,21 +21,21 @@ function salt(password, salt=null) {
  * 
  */
 function slugify(text) {
-	text = text.trim().toLowerCase();
+	let newText = text.trim().toLowerCase();
 
-    text = text.replace(new RegExp('[ÁÀÂÃ][áàâã]','gi'), 'a');
-    text = text.replace(new RegExp('[ÉÈÊ][éèê]','gi'), 'e');
-    text = text.replace(new RegExp('[ÍÌÎ][íìî]','gi'), 'i');
-    text = text.replace(new RegExp('[ÓÒÔÕ][óòôõ]','gi'), 'o');
-    text = text.replace(new RegExp('[ÚÙÛ][úùû]','gi'), 'u');
-	text = text.replace(new RegExp('[Ç][ç]','gi'), 'c');
-	text = text.replace(new RegExp('[\(\)]', 'g'), '');
+	newText = newText.replace(new RegExp('[ÁÀÂÃ][áàâã]','gi'), 'a');
+	newText = newText.replace(new RegExp('[ÉÈÊ][éèê]','gi'), 'e');
+	newText = newText.replace(new RegExp('[ÍÌÎ][íìî]','gi'), 'i');
+	newText = newText.replace(new RegExp('[ÓÒÔÕ][óòôõ]','gi'), 'o');
+	newText = newText.replace(new RegExp('[ÚÙÛ][úùû]','gi'), 'u');
+	newText = newText.replace(new RegExp('[Ç][ç]','gi'), 'c');
+	newText = newText.replace(new RegExp('[\(\)]', 'g'), '');
 	
-	text = text.replace(new RegExp(' - | ', 'g'), '-');
-    return text;                 
+	newText = newText.replace(new RegExp(' - | ', 'g'), '-');
+	return newText;
 }
 
-module.exports = {
+export default {
 	slugify,
 	salt,
 }
