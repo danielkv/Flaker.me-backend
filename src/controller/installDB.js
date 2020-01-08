@@ -1,13 +1,16 @@
-import { Company, UserMeta } from '../model/index';
+import Company from '../model/company';
+import CompanyMeta from '../model/companyMeta';
+import UserMeta from '../model/userMeta';
 import conn from '../services/connection';
 
 function install (req, res) {
+	// eslint-disable-next-line no-undef
 	if (!process.env.SETUP || process.env.SETUP !== 'true') return res.status(404).send('Not Found');
 	
 	let result = '';
 
 	conn.authenticate()
-		.then(async (t)=>{
+		.then(async ()=>{
 			result += '<li>Connected to Database</li>';
 
 			await conn.query('SET FOREIGN_KEY_CHECKS = 0', { raw: true }).then(()=>conn.drop());
@@ -37,20 +40,27 @@ function createDummyData() {
 		name: 'Empresa Razão Social',
 		displayName: 'Empresa Nome fantasia',
 		email: 'danielkv@gmail.com',
-	}).then( (company)=>{
+		metas: [
+			{
+				key: 'limit',
+				value: 104857600,
+			}
+		]
+	}, { include: [CompanyMeta]}).then( (company)=>{
 		company.createUser({
 			firstName: 'Daniel',
 			lastName: 'Guolo',
 			email: 'danielkv@gmail.com',
 			password: '123456',
+			bucket: 'daniel_flaker',
 			metas: [
 				{
 					key: 'watch',
-					value: '["C:/Users/danie/Desktop/imas"]',
+					value: '["C:/Users/danie/Desktop/backups"]',
 				}
 			]
 		}, { include: [UserMeta]})
 	})
 }
 
-module.exports = install;
+export default install;

@@ -1,6 +1,9 @@
 import { gql } from 'apollo-server';
 
-import { Company, CompanyMeta } from '../model'
+import Company from '../model/company';
+import CompanyMeta from '../model/companyMeta';
+import conn from '../services/connection';
+import { getCompanyFilesSize, getCompanyLimit } from '../utils/files';
 
 export const typeDefs = gql`
 	type Company {
@@ -14,6 +17,8 @@ export const typeDefs = gql`
 		metas: [Meta]!
 
 		users(filter: Filter, pagination: Pagination): [User]!
+		limit: Long!
+		size: Long!
 	}
 
 	input CompanyInput {
@@ -36,13 +41,13 @@ export const typeDefs = gql`
 export const resolvers = {
 	Mutation : {
 		createCompany: (_, { data }) => {
-			return sequelize.transaction(transaction => {
-				return Companies.create(data, { include: [CompaniesMeta], transaction })
+			return conn.transaction(transaction => {
+				return Company.create(data, { include: [CompanyMeta], transaction })
 			})
 		},
 		updateCompany: (_, { id, data }) => {
-			return sequelize.transaction(transaction => {
-				return Companies.findByPk(id)
+			return conn.transaction(transaction => {
+				return Company.findByPk(id)
 					.then(company => {
 						if (!company) throw new Error('Empresa não encontrada');
 
@@ -73,7 +78,13 @@ export const resolvers = {
 			return parent.getMetas();
 		},
 		users: (parent) => {
-			return parent.getMetas();
+			return parent.getUsers();
+		},
+		size: (parent) => {
+			return getCompanyFilesSize(parent.get('id'));
+		},
+		limit: (parent) => {
+			return getCompanyLimit(parent.get('id'));
 		}
 	}
 }

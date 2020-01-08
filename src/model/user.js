@@ -38,6 +38,7 @@ User.init({
 	firstName: Sequelize.STRING,
 	lastName: Sequelize.STRING,
 	email: Sequelize.STRING,
+	bucket: Sequelize.STRING,
 	password: {
 		type: Sequelize.STRING,
 		allowNull:false,

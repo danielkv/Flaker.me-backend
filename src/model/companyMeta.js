@@ -36,7 +36,7 @@ CompanyMeta.init({
 		type: STRING,
 		comment: 'phone | email | document | business_hours | address | ...',
 		set(val) {
-			const unique_types = ['document', 'business_hours'];
+			const unique_types = ['document', 'limit'];
 			if (unique_types.includes(val))
 				this.setDataValue('unique', true);
 			

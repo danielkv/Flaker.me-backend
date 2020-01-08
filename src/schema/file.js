@@ -1,8 +1,8 @@
 import { gql } from 'apollo-server';
 import { format } from 'util';
 
-import { File } from '../model';
-import { generateNewFileName } from '../utils/files';
+// import { File from '../model/file';
+import { generateNewFileName, checkBeforeFileUpload } from '../utils/files';
 
 
 export const typeDefs = gql`
@@ -11,7 +11,7 @@ export const typeDefs = gql`
 		id: ID!
 		name: String!
 		originalName: String!
-		size: Int!
+		size: Long!
 		url: String!
 		bucket: String
 		hash: String!
@@ -24,8 +24,9 @@ export const typeDefs = gql`
 	input FileInput {
 		name: String
 		originalName: String
-		size: Int
+		size: Long
 		bucket: String
+		#createdAt: Int
 		#url: String
 		hash: String
 		deleted: Boolean
@@ -34,7 +35,7 @@ export const typeDefs = gql`
 	extend type Query {
 		file(id: ID!): File!
 
-		requestUploadUri(originalName: String!): String!
+		requestUploadUri(originalName: String!, size: Long!): String!
 	}
 
 	extend type Mutation {
@@ -51,23 +52,25 @@ export const resolvers = {
 					if (!file) throw new Error('Arquivo não encontrado')
 				})
 		},
-		requestUploadUri: async (_, { originalName }, ctx) => {
-			const newFileName = generateNewFileName(originalName);
-			const newFile = ctx.bucket.file(newFileName);
+		requestUploadUri: async (_, { originalName, size }, ctx) => {
+			if (await checkBeforeFileUpload({ company_id: ctx.company.get('id'), size })) {
+				const newFileName = generateNewFileName(originalName);
+				const newFile = ctx.bucket.file(newFileName);
 
-			const uri = await newFile.createResumableUpload();
+				const [uri] = await newFile.createResumableUpload();
 
-			return uri;
+				return uri;
+			}
 		}
 	},
 
 	Mutation: {
-		createFile: (_, { data }) => {
+		createFile: (_, { data }, ctx) => {
 			// insert url in data
 			data.url = format(`https://storage.googleapis.com/${data.bucket}/${data.name}`);
 
 			// save file
-			return File.create(data);
+			return ctx.user.createFile(data);
 		},
 		updateFile: (_, { id, data }) => {
 			return File.findByPk(id)

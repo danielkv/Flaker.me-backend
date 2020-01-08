@@ -8,6 +8,9 @@ import authentication from './controller/authentication';
 import router from './router';
 import schema from './schema/';
 
+//setup DB
+import './services/setup';
+
 
 // eslint-disable-next-line no-undef
 const port = process.env.PORT || 4000;

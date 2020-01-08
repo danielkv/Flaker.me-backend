@@ -9,6 +9,7 @@
 			"request": "attach",
 			"protocol": "inspector",
 			"name": "Attach Program",
+			"port": 9228,
 			"restart": true,
 			"skipFiles": [
 				"<node_internals>/**"

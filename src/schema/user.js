@@ -1,10 +1,11 @@
 import { gql } from 'apollo-server';
-import { sign, verify } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 
 import User from '../model/user';
 import UserMeta from '../model/userMeta';
 import conn from '../services/connection';
-import { salt } from '../utils';
+import gcloud from '../services/gcloud';
+import { salt, slugify } from '../utils';
 
 
 export const typeDefs = gql`
@@ -71,8 +72,22 @@ export const resolvers = {
 		}
 	},
 	Mutation : {
-		createUser: (_, { data }, ctx) => {
-			return ctx.company.createUser(data, { include: [UserMeta]});
+		createUser: (_, { data }) => {
+			return conn.transaction(async (transaction) => {
+				// create bucket name
+				const bucketName = `${slugify(newUser.get('firstName'))}_flaker`;
+				const bucket = gcloud.bucket(bucketName);
+				
+				// check if bucket exists
+				const [bucketExists] = await bucket.exists();
+				if (bucketExists) throw new Error('Bucket já existe');
+				
+				// create bucket
+				await bucket.create();
+				
+				// create new user
+				const newUser = User.createUser({ ...data, bucket: bucketName }, { include: [UserMeta], transaction });
+			})
 		},
 		updateUser: (_, { id, data }) => {
 			return conn.transaction(transaction => {
@@ -109,7 +124,7 @@ export const resolvers = {
 					if (user_found.password != salted.password) throw new Error('Senha incorreta');
 					
 					// generates webtoken with id e email
-					const token = sign({
+					const token = jwt.sign({
 						id: user_found.get('id'),
 						email: user_found.get('email'),
 					// eslint-disable-next-line no-undef
@@ -123,7 +138,7 @@ export const resolvers = {
 		},
 		authenticate: (_, { token }) => {
 			// eslint-disable-next-line no-undef
-			const { id, email } = verify(token, process.env.PRIVATE_KEY);
+			const { id, email } = jwt.verify(token, process.env.PRIVATE_KEY);
 
 			return User.findAll({ where: { id, email } })
 				.then(([user_found])=>{
@@ -171,7 +186,7 @@ export const resolvers = {
 			return parent.getCompany();
 		},
 		files: (parent) => {
-			return parent.getFiles({ where: { deleted: false } });
+			return parent.getFiles({ where: { deleted: false }, order: [['createdAt', 'DESC']]});
 		},
 		settings: (parent) => {
 			return parent.getMetas({ where: { key: ['watch', 'bucket']} });

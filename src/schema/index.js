@@ -1,4 +1,5 @@
 import { makeExecutableSchema, gql } from 'apollo-server';
+import GraphQLLong from 'graphql-type-long';
 import { merge } from 'lodash';
 
 //types
@@ -16,6 +17,8 @@ const typeDefs = gql`
 
 	#scalar Upload
 
+	scalar Long
+
 	input Filter {
 		showInactive: Boolean
 		status: String
@@ -29,7 +32,9 @@ const typeDefs = gql`
 	}
 `
 
-const resolvers = {}
+const resolvers = {
+	Long: GraphQLLong
+}
 
 export default makeExecutableSchema({
 	typeDefs : [typeDefs, Company, User, File, Address, Phone, Meta],
