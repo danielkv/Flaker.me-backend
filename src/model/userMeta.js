@@ -12,7 +12,7 @@ class UserMeta extends Model {
 	 * 
 	 */
 	
-	static async updateAll(metas, model_instance, transaction) {
+	static async updateAll(metas, model_instance, transaction = null) {
 		const metas_create = metas.filter(row => !row.id && row.action === 'create');
 		const metas_update = metas.filter(row => row.id && row.action === 'update');
 		const metas_remove = metas.filter(row => row.id && row.action === 'delete');
@@ -20,7 +20,7 @@ class UserMeta extends Model {
 		const [removed, created, updated] = await Promise.all([
 			UserMeta.destroy({ where: { id: metas_remove.map(r => r.id) } , transaction }).then(() => metas_remove),
 			Promise.all(metas_create.map(row => model_instance.createMeta(row, { transaction }))),
-			Promise.all(metas_update.map(row => model_instance.getMetas({ where: { id:row.id } }).then(([meta]) => {if (!meta) throw new Error('Esse metadado não pertence a esse usuário'); return meta.update(row, { fields:['meta_value'], transaction })})))
+			Promise.all(metas_update.map(row => model_instance.getMetas({ where: { id:row.id } }).then(([meta]) => {if (!meta) throw new Error('Esse metadado não pertence a esse usuário'); return meta.update(row, { fields:['value'], transaction })})))
 		]);
 
 		return {
@@ -29,14 +29,14 @@ class UserMeta extends Model {
 			updated,
 		};
 	}
-};
+}
 
 UserMeta.init({
 	key: {
 		type: STRING,
 		comment: 'phone | email | document | business_hours | address | ...',
 		set(val) {
-			const unique_types = ['document', 'business_hours'];
+			const unique_types = ['lifecycle', 'watch', 'document'];
 			if (unique_types.includes(val))
 				this.setDataValue('unique', true);
 			

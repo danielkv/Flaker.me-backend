@@ -12,7 +12,7 @@ export const typeDefs = gql`
 		id: ID
 		action: String! #create | update | delete
 		key: String
-		meta_value: String
+		value: String
 	}
 `;
 

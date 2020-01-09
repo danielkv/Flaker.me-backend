@@ -49,9 +49,7 @@ export const typeDefs = gql`
 		
 		setUserRole(id: ID!, role_id: ID!): User!
 
-		removeUserAddress(id: ID!): Address!
-		updateUserAddress(id: ID!, data: AddressInput!): Address!
-		createUserAddress(data: AddressInput!): Address!
+		saveSettings(data: [MetaInput!]!): [Meta]!
 	}
 
 	extend type Query {
@@ -75,7 +73,7 @@ export const resolvers = {
 		createUser: (_, { data }) => {
 			return conn.transaction(async (transaction) => {
 				// create bucket name
-				const bucketName = `${slugify(newUser.get('firstName'))}_flaker`;
+				const bucketName = `${slugify(newUser.get('firstName'))}_${slugify(company)}_flaker`;
 				const bucket = gcloud.bucket(bucketName);
 				
 				// check if bucket exists
@@ -147,35 +145,12 @@ export const resolvers = {
 					return user_found;
 				})
 		},
-		removeUserAddress: (_, { id }) => {
-			return UserMeta.findByPk(id)
-				.then(async (address_found)=>{
-					if (!address_found) throw new Error('Endereço não encontrado');
-
-					const removed = await address_found.destroy();
-
-					return { id, ...JSON.parse(removed.meta_value) };
+		saveSettings: (_, { data }, { user }) => {
+			return UserMeta.updateAll(data, user)
+				.then(() => {
+					return user.getMetas({ where: { key: ['watch', 'bucket', 'lifecycle']} });
 				})
-		},
-		updateUserAddress: (parent, { id, data }, ctx) => {
-			return ctx.user.getMetas({ where: { meta_type: 'address', id } })
-				.then(async ([address_found])=>{
-					if (!address_found) throw new Error('Endereço não encontrado');
-					
-					const updated = await address_found.update({ meta_value: JSON.stringify(data) })
-					
-					return { id, ...JSON.parse(updated.meta_value) };
-				});
-		},
-		createUserAddress: (parent, { data }, ctx) => {
-			return ctx.user.createMeta({ meta_type: 'address', meta_value: JSON.stringify(data) })
-				.then((meta_address) => {
-					return {
-						id: meta_address.get('id'),
-						...JSON.parse(meta_address.get('meta_value'))
-					}
-				})
-		},
+		}
 	},
 	
 	User: {
@@ -189,7 +164,7 @@ export const resolvers = {
 			return parent.getFiles({ where: { deleted: false }, order: [['createdAt', 'DESC']]});
 		},
 		settings: (parent) => {
-			return parent.getMetas({ where: { key: ['watch', 'bucket']} });
+			return parent.getMetas({ where: { key: ['watch', 'bucket', 'lifecycle']} });
 		},
 	}
 }
