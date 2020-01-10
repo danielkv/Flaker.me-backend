@@ -11,6 +11,21 @@ router.get('/networkTest', (req, res) => {
 	res.send(`Connected at ${req.hostname}<br>Host: ${req.headers.host}<br>Secure connection: ${!!req.secure}<br>Protocol: ${req.protocol}`);
 });
 
+// networt test
+router.get('/createCompany', (req, res) => {
+	res.send({
+		name: '',
+		displayName: '',
+		email: '',
+		metas: [
+			{
+				key: 'limit',
+				value: 5368709120 // 5GB
+			}
+		]
+	});
+});
+
 // rota de instalação
 router.get('/setup', installDataBase);
 

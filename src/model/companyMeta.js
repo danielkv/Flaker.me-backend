@@ -21,7 +21,7 @@ class CompanyMeta extends Model {
 		const [removed, created, updated] = await Promise.all([
 			CompanyMeta.destroy({ where: { id: metas_remove.map(r => r.id) }, transaction }).then(() => metas_remove),
 			Promise.all(metas_create.map(row => model_instance.createMeta(row, { transaction }))),
-			Promise.all(metas_update.map(row => model_instance.getMetas({ where:{ id:row.id } }).then(([meta]) => {if (!meta) throw new Error('Esse metadado não pertence a essa empresa'); return meta.update(row, { fields:['value'], transaction })})))
+			Promise.all(metas_update.map(row => model_instance.getMetas({ where:{ id:row.id } }).then(([meta]) => {if (!meta) throw new Error('Metadado não encontrado'); return meta.update(row, { fields:['value'], transaction })})))
 		]);
 
 		return {
@@ -30,7 +30,7 @@ class CompanyMeta extends Model {
 			updated,
 		};
 	}
-};
+}
 CompanyMeta.init({
 	key: {
 		type: STRING,

@@ -1,6 +1,8 @@
 import { gql } from 'apollo-server';
 import jwt from 'jsonwebtoken';
 
+import { updateLifecycle } from '../controller/bucket';
+import Company from '../model/company';
 import User from '../model/user';
 import UserMeta from '../model/userMeta';
 import conn from '../services/connection';
@@ -26,6 +28,7 @@ export const typeDefs = gql`
 	}
 
 	input UserInput {
+		token: String
 		firstName: String
 		lastName: String
 		password: String
@@ -72,8 +75,14 @@ export const resolvers = {
 	Mutation : {
 		createUser: (_, { data }) => {
 			return conn.transaction(async (transaction) => {
+				// check company's token
+				const company = await Company.findOne({ where:{ token:data.token } })
+				if (!company) throw new Error('Token incorreto');
+
 				// create bucket name
-				const bucketName = `${slugify(newUser.get('firstName'))}_${slugify(company)}_flaker`;
+				const companySlug = slugify(company.get('name'));
+				const userSlug = slugify(data.firstName);
+				const bucketName = `${companySlug}_${userSlug}_flaker`;
 				const bucket = gcloud.bucket(bucketName);
 				
 				// check if bucket exists
@@ -82,9 +91,29 @@ export const resolvers = {
 				
 				// create bucket
 				await bucket.create();
-				
+
+				// set labels
+				await bucket.setLabels({
+					empresa: companySlug,
+					usuario: userSlug,
+				});
+
+				// check metas
+				if (!data.metas) {
+					data.metas = [
+						{
+							key: 'watch',
+							value: '',
+						},
+						{
+							key: 'lifecycle',
+							value: '0',
+						}
+					]
+				}
+
 				// create new user
-				const newUser = User.createUser({ ...data, bucket: bucketName }, { include: [UserMeta], transaction });
+				return company.createUser({ ...data, bucket: bucketName }, { include: [UserMeta], transaction });
 			})
 		},
 		updateUser: (_, { id, data }) => {
@@ -108,7 +137,7 @@ export const resolvers = {
 				.then((user) => {
 					if (!user) throw new Error('Usuário não encontrada');
 
-					return user.update({ role }, { fields: ['role']});
+					return user.update({ role }, { fields: ['role'] });
 				});
 		},
 		login: (_, { email, password }) => {
@@ -147,8 +176,14 @@ export const resolvers = {
 		},
 		saveSettings: (_, { data }, { user }) => {
 			return UserMeta.updateAll(data, user)
-				.then(() => {
-					return user.getMetas({ where: { key: ['watch', 'bucket', 'lifecycle']} });
+				.then(async () => {
+					const lifecycleSetting = data.find((set) => set.key === 'lifecycle');
+					if (lifecycleSetting) {
+						const days = parseInt(lifecycleSetting.value);
+						await updateLifecycle(user, days);
+					}
+
+					return user.getMetas({ where: { key: ['watch', 'bucket', 'lifecycle'] } });
 				})
 		}
 	},
@@ -161,10 +196,10 @@ export const resolvers = {
 			return parent.getCompany();
 		},
 		files: (parent) => {
-			return parent.getFiles({ where: { deleted: false }, order: [['createdAt', 'DESC']]});
+			return parent.getFiles({ where: { deleted: false }, order: [['createdAt', 'DESC']] });
 		},
 		settings: (parent) => {
-			return parent.getMetas({ where: { key: ['watch', 'bucket', 'lifecycle']} });
+			return parent.getMetas({ where: { key: ['watch', 'bucket', 'lifecycle'] } });
 		},
 	}
 }

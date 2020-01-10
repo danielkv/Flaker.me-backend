@@ -20,7 +20,8 @@ class UserMeta extends Model {
 		const [removed, created, updated] = await Promise.all([
 			UserMeta.destroy({ where: { id: metas_remove.map(r => r.id) } , transaction }).then(() => metas_remove),
 			Promise.all(metas_create.map(row => model_instance.createMeta(row, { transaction }))),
-			Promise.all(metas_update.map(row => model_instance.getMetas({ where: { id:row.id } }).then(([meta]) => {if (!meta) throw new Error('Esse metadado não pertence a esse usuário'); return meta.update(row, { fields:['value'], transaction })})))
+			// eslint-disable-next-line max-len
+			Promise.all(metas_update.map(row => model_instance.getMetas({ where: { id:row.id } }).then(([meta]) => {if (!meta) throw new Error('Metadado não encontrado'); return meta.update(row, { fields:['value'], transaction })})))
 		]);
 
 		return {

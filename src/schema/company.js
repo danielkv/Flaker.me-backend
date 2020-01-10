@@ -1,4 +1,5 @@
 import { gql } from 'apollo-server';
+import { randomBytes } from 'crypto';
 
 import Company from '../model/company';
 import CompanyMeta from '../model/companyMeta';
@@ -13,6 +14,7 @@ export const typeDefs = gql`
 		active: Boolean!
 		createdAt: String!
 		updatedAt: String!
+		token: String!
 
 		metas: [Meta]!
 
@@ -40,10 +42,12 @@ export const typeDefs = gql`
 
 export const resolvers = {
 	Mutation : {
-		createCompany: (_, { data }) => {
-			return conn.transaction(transaction => {
-				return Company.create(data, { include: [CompanyMeta], transaction })
-			})
+		createCompany: (_, { data }, { user }) => {
+			if (user.id !== 1) throw new Error('Você não tem autorização para criar uma empresa');
+
+			data.token = randomBytes(8).toString('hex');
+
+			return Company.create(data, { include: [CompanyMeta] })
 		},
 		updateCompany: (_, { id, data }) => {
 			return conn.transaction(transaction => {

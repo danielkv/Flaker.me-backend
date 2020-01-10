@@ -1,3 +1,5 @@
+import { randomBytes } from 'crypto';
+
 import Company from '../model/company';
 import CompanyMeta from '../model/companyMeta';
 import UserMeta from '../model/userMeta';
@@ -40,13 +42,14 @@ function createDummyData() {
 		name: 'Empresa Razão Social',
 		displayName: 'Empresa Nome fantasia',
 		email: 'danielkv@gmail.com',
+		token: randomBytes(8).toString('hex'),
 		metas: [
 			{
 				key: 'limit',
 				value: 104857600,
 			}
 		]
-	}, { include: [CompanyMeta]}).then( (company)=>{
+	}, { include: [CompanyMeta] }).then( (company)=>{
 		company.createUser({
 			firstName: 'Daniel',
 			lastName: 'Guolo',
@@ -59,7 +62,7 @@ function createDummyData() {
 					value: '["C:/Users/danie/Desktop/backups"]',
 				}
 			]
-		}, { include: [UserMeta]})
+		}, { include: [UserMeta] })
 	})
 }
 

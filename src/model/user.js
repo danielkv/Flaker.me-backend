@@ -56,9 +56,9 @@ User.init({
 	},
 	role: {
 		type: Sequelize.STRING,
-		defaultValue: 'customer',
+		defaultValue: 'station',
 		allowNull: false,
-		comment: 'master | adm | customer | default'
+		comment: 'station | adm'
 	}
 }, {
 	modelName : 'users', //nome da tabela
