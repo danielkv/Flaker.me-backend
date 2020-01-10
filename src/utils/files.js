@@ -44,8 +44,9 @@ export async function getCompanyLimit(company_id) {
 export async function checkBeforeFileUpload({ company_id, size: fileSize }) {
 	const totalSize = await getCompanyFilesSize(company_id);
 	const limit = await getCompanyLimit(company_id);
+	const nextTotal = totalSize + fileSize;
 
-	if (totalSize + fileSize > limit) throw new Error('O limite de espaço foi atingido');
+	if (nextTotal > limit) throw new Error('O limite de espaço foi atingido');
 
 	return true;
 }
