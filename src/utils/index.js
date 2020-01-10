@@ -29,6 +29,7 @@ export function slugify(text) {
 	newText = newText.replace(new RegExp('[ÓÒÔÕ]|[óòôõ]','gi'), 'o');
 	newText = newText.replace(new RegExp('[ÚÙÛ]|[úùû]','gi'), 'u');
 	newText = newText.replace(new RegExp('[Ç]|[ç]','gi'), 'c');
+	// eslint-disable-next-line no-useless-escape
 	newText = newText.replace(new RegExp('[\(\)]', 'g'), '');
 	
 	newText = newText.replace(new RegExp(' - | ', 'g'), '-');
