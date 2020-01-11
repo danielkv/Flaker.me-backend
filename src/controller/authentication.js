@@ -7,7 +7,7 @@ import gcloud from '../services/gcloud';
 
 export default async ({ req, connection }) => {
 	// if subscription
-	if (connection) return {};
+	if (connection) return;
 
 	// continue when normal headers
 	const { authorization, company_id } = req.headers;
@@ -28,9 +28,7 @@ export default async ({ req, connection }) => {
 			.then((user_found) => {
 				return user_found.get('email') === email ? user_found : null;
 			});
-
 	}
-
 
 	// check company
 	if (user && company_id) {
