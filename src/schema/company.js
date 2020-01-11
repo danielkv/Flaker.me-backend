@@ -12,7 +12,7 @@ export const typeDefs = gql`
 		name: String!
 		display_name: String!
 		active: Boolean!
-		createdAt: String!
+		createdAt: DateTime!
 		updatedAt: String!
 		token: String!
 

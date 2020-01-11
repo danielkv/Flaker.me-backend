@@ -16,8 +16,8 @@ export const typeDefs = gql`
 		bucket: String
 		hash: String!
 		deleted: Boolean!
-		createdAt: String!
-		updatedAt: String!
+		createdAt: DateTime!
+		updatedAt: DateTime!
 		company: Company!
 	}
 
@@ -26,8 +26,6 @@ export const typeDefs = gql`
 		originalName: String
 		size: Long
 		bucket: String
-		#createdAt: Int
-		#url: String
 		hash: String
 		deleted: Boolean
 	}

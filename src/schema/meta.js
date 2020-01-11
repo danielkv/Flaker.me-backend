@@ -5,7 +5,7 @@ export const typeDefs = gql`
 		id: ID!
 		key: String!
 		value: String!
-		createdAt: String!
+		createdAt: DateTime!
 	}
 
 	input MetaInput {
