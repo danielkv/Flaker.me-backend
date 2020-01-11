@@ -1,7 +1,7 @@
 import { gql } from 'apollo-server';
 import { format } from 'util';
 
-// import { File from '../model/file';
+import gcloud from '../services/gcloud';
 import { generateNewFileName, checkBeforeFileUpload } from '../utils/files';
 
 
@@ -39,6 +39,8 @@ export const typeDefs = gql`
 	extend type Mutation {
 		createFile(data: FileInput!): File!
 		updateFile(id: ID!, data: FileInput!): File!
+
+		checkDeletedFiles: [File]!
 	}
 `;
 
@@ -63,21 +65,45 @@ export const resolvers = {
 	},
 
 	Mutation: {
-		createFile: (_, { data }, ctx) => {
+		createFile: (_, { data }, { user }) => {
 			// insert url in data
 			data.url = format(`https://storage.googleapis.com/${data.bucket}/${data.name}`);
 
 			// save file
-			return ctx.user.createFile(data);
+			return user.createFile(data);
 		},
 		updateFile: (_, { id, data }) => {
 			return File.findByPk(id)
 				.then(file => {
 					if (!file) throw new Error('Arquivo não encontrado');
 
-					return file.update(data, { fields: ['deleted']})
+					return file.update(data, { fields: ['deleted'] })
 				})
 		},
+		checkDeletedFiles: (_, __, { user }) => {
+			return user.getFiles({ where: { deleted: false } })
+				.then(async (files) => {
+					const returnFiles = [];
+
+					await Promise.all(
+						files.map(async (file) => {
+							const bucket = gcloud.bucket(user.bucket);
+							const [bucketExists] = await bucket.exists();
+							if (!bucketExists) throw new Error('Bucket não foi encontrado');
+
+							const gFile = bucket.file(file.name);
+							const [fileExists] = await gFile.exists();
+
+							if (!fileExists) {
+								await file.update({ deleted: true });
+								returnFiles.push(file);
+							}
+						})
+					)
+
+					return returnFiles;
+				})
+		}
 	},
 
 
