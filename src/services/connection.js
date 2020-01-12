@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import Sequelize from 'sequelize';
 
 // Faz a conexão do sequelize com o servidor

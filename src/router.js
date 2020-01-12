@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import { Router } from 'express';
 
 import installDataBase from './controller/installDB';
