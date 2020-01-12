@@ -8,7 +8,7 @@
   "scripts": {
     "start": "sucrase-node ./src/app.js",
 	"dev": "nodemon ./src/app.js",
-	"build": "sucrase ./src -d build transforms javascript,imports",
+	"build": "sucrase ./src -d /build --transforms javascript,imports",
 	"lint": "eslint --cache --color --ext .jsx,.js src"
   },
   "dependencies": {
