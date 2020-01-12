@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import { Model, STRING, TEXT, BOOLEAN } from 'sequelize';
 
 import conn from '../services/connection';

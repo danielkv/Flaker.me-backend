@@ -6,7 +6,7 @@ import conn from '../services/connection';
  * Define modelo (tabela) de arquivos
  */
 
-class File extends Model {};
+class File extends Model {}
 
 File.init({
 	name: STRING,
