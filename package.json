@@ -6,8 +6,9 @@
   "author": "Daniel K. Guolo <daniel_kv@hotmail.com>",
   "license": "MIT",
   "scripts": {
-    "start": "node ./src/app.js",
+    "start": "sucrase-node ./src/app.js",
 	"dev": "nodemon ./src/app.js",
+	"build": "sucrase ./src -d build transforms javascript,imports",
 	"lint": "eslint --cache --color --ext .jsx,.js src"
   },
   "dependencies": {
